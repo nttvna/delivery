@@ -4,16 +4,19 @@ import IconButton from '@/components/iconButton';
 import InputWithIcon from '@/components/inputWithIcon';
 import { mainColor } from '@/constants/systemconstant';
 import { showToast } from '@/hooks/common';
+import { login } from '@/redux/systemSlice';
 import { app } from '@/scripts/firebaseConfig'; // Your Firebase app instance
-import { useNavigation } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
+import { useDispatch } from 'react-redux';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigation = useNavigation<any>();
+  const dispatch = useDispatch();
   const [doLogin, { isLoading, isSuccess, isError }] = useLoginMutation();
   const handleLogin = async () => {
     if (!email) {
@@ -29,10 +32,10 @@ const Login = () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       // Access the UID here
-    const uid = user.uid;
-
-    console.log('User signed in successfully!');
-    console.log('User UID:', uid);
+      const uid = user.uid;
+      console.log('User UID:', uid);
+      dispatch(login({ user: user.uid, token: 'abc12345' }));
+      router.replace('/(tabs)');
       // You can now navigate to another screen or update your app state
     } catch (error) {
       console.error('Sign-in error:', error);

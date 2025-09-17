@@ -1,9 +1,10 @@
 import { accountApi } from '@/api/account';
 import { configureStore } from '@reduxjs/toolkit';
+import systemReducer from './systemSlice';
 
 export const store = configureStore({
   reducer: {
-    // Add the generated reducer as a specific top-level slice
+    System: systemReducer,
     [accountApi.reducerPath]: accountApi.reducer,
   },
   // Adding the middleware enables caching, invalidation, and other features
