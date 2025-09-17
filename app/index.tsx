@@ -4,8 +4,9 @@ import IconButton from '@/components/iconButton';
 import InputWithIcon from '@/components/inputWithIcon';
 import { mainColor } from '@/constants/systemconstant';
 import { showToast } from '@/hooks/common';
-import auth from '@react-native-firebase/auth';
+import { app } from '@/scripts/firebaseConfig'; // Your Firebase app instance
 import { useNavigation } from 'expo-router';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 const Login = () => {
@@ -14,7 +15,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const navigation = useNavigation<any>();
   const [doLogin, { isLoading, isSuccess, isError }] = useLoginMutation();
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email) {
       showToast('Please enter Email');
       return;
@@ -23,34 +24,40 @@ const Login = () => {
       showToast('Please enter Password');
       return;
     }
-    auth().signInWithEmailAndPassword(email, password)
-      .then(res=>{
-        console.log(res);
-      })
-      .catch(error => {
-        console.log(error);
-        showToast('A error occurred.Please try again later');
-      });
-   /*  doLogin({ token: AccessToken, strUserId: 'vs3oeDY30MPD1cJmd0REDms205s1' })
-      .unwrap()
-      .then(response => {
-        const { statusCode, messageCode, result } = response;
-        console.log('data');
-        console.log(statusCode);
-        console.log(messageCode);
-        console.log(result);
+    const auth = getAuth(app);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      // Access the UID here
+    const uid = user.uid;
 
-      })
-      .catch(err => {
-        console.log('err');
-        console.log(err);
-      });
-    // Hardcoded credentials for this example
-    if (email === 'admin' && password === '123') {
-      navigation.navigate('Home');
-    } else {
-      Alert.alert('Login Failed', 'Invalid username or password.');
-    } */
+    console.log('User signed in successfully!');
+    console.log('User UID:', uid);
+      // You can now navigate to another screen or update your app state
+    } catch (error) {
+      console.error('Sign-in error:', error);
+      // Handle specific errors (e.g., wrong password, user not found)
+    }
+    /*  doLogin({ token: AccessToken, strUserId: 'vs3oeDY30MPD1cJmd0REDms205s1' })
+       .unwrap()
+       .then(response => {
+         const { statusCode, messageCode, result } = response;
+         console.log('data');
+         console.log(statusCode);
+         console.log(messageCode);
+         console.log(result);
+ 
+       })
+       .catch(err => {
+         console.log('err');
+         console.log(err);
+       });
+     // Hardcoded credentials for this example
+     if (email === 'admin' && password === '123') {
+       navigation.navigate('Home');
+     } else {
+       Alert.alert('Login Failed', 'Invalid username or password.');
+     } */
   };
   const updateEmail = (val: string) => {
     setError('');
