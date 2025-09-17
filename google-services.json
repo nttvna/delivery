@@ -1,0 +1,313 @@
+{
+  "project_info": {
+    "project_number": "15056437665",
+    "firebase_url": "https://ring-a-meal.firebaseio.com",
+    "project_id": "ring-a-meal",
+    "storage_bucket": "ring-a-meal.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:15056437665:android:eae335cce87eee0e",
+        "android_client_info": {
+          "package_name": "com.bluejaypos.ringameal"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "15056437665-5gsubsi7cn80f0oo1cg7e4do70kk67q0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bluejaypos.ringameal",
+            "certificate_hash": "e09f65e1153aa64cc43ee604669ec06ec716749e"
+          }
+        },
+        {
+          "client_id": "15056437665-7pkfm2j3vbbuotam6g027e08pl4843tf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bluejaypos.ringameal",
+            "certificate_hash": "33bae5dbf126f20883b1b77a964725fda587e42b"
+          }
+        },
+        {
+          "client_id": "15056437665-tikr7ic3d4guqch99b2f7i1uithbi71u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bluejaypos.ringameal",
+            "certificate_hash": "6717997c1f76312f90796db73f76ca1db73f787d"
+          }
+        },
+        {
+          "client_id": "15056437665-7ec048rkqdvfsvodvib7kpq6f1b6pnp9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDI2CQ5E3eLmKO69iDeLHRmVt3wLBOTo1k"
+        },
+        {
+          "current_key": "AIzaSyBL3j9oepD7EXLfiCQX6P09dhreiERZvTc"
+        },
+        {
+          "current_key": "AIzaSyCRmwk9YarjxizmqDUeKzet2OPznjwd8-0"
+        },
+        {
+          "current_key": "AIzaSyDXXJtJxO-ogkDuH_oJRN5_1UzofpprrWU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "15056437665-7ec048rkqdvfsvodvib7kpq6f1b6pnp9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "15056437665-b1m128i9724p7uc69pgik6d5q6saonqp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ringameal.customer",
+                "app_store_id": "1436691199"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:15056437665:android:e227aaf9c08806df448be0",
+        "android_client_info": {
+          "package_name": "com.restaurant.delivery"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "15056437665-7ec048rkqdvfsvodvib7kpq6f1b6pnp9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDI2CQ5E3eLmKO69iDeLHRmVt3wLBOTo1k"
+        },
+        {
+          "current_key": "AIzaSyBL3j9oepD7EXLfiCQX6P09dhreiERZvTc"
+        },
+        {
+          "current_key": "AIzaSyCRmwk9YarjxizmqDUeKzet2OPznjwd8-0"
+        },
+        {
+          "current_key": "AIzaSyDXXJtJxO-ogkDuH_oJRN5_1UzofpprrWU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "15056437665-7ec048rkqdvfsvodvib7kpq6f1b6pnp9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "15056437665-b1m128i9724p7uc69pgik6d5q6saonqp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ringameal.customer",
+                "app_store_id": "1436691199"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:15056437665:android:85e463facf56bb90448be0",
+        "android_client_info": {
+          "package_name": "com.restaurant.pos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "15056437665-7ec048rkqdvfsvodvib7kpq6f1b6pnp9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDI2CQ5E3eLmKO69iDeLHRmVt3wLBOTo1k"
+        },
+        {
+          "current_key": "AIzaSyBL3j9oepD7EXLfiCQX6P09dhreiERZvTc"
+        },
+        {
+          "current_key": "AIzaSyCRmwk9YarjxizmqDUeKzet2OPznjwd8-0"
+        },
+        {
+          "current_key": "AIzaSyDXXJtJxO-ogkDuH_oJRN5_1UzofpprrWU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "15056437665-7ec048rkqdvfsvodvib7kpq6f1b6pnp9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "15056437665-b1m128i9724p7uc69pgik6d5q6saonqp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ringameal.customer",
+                "app_store_id": "1436691199"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:15056437665:android:deef6bbe4984af97",
+        "android_client_info": {
+          "package_name": "com.ringameal.driver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "15056437665-5sbml7rj9lrbkssb2q2icfd0rfqk4hbo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ringameal.driver",
+            "certificate_hash": "85a1c3855a71f6e7201ddc2b9610f0db553d0fbc"
+          }
+        },
+        {
+          "client_id": "15056437665-ch8uk004s12hmoq9ptaefa0rjebda0ln.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ringameal.driver",
+            "certificate_hash": "195dd9db27774a529a8273f812a5668a4eab72a7"
+          }
+        },
+        {
+          "client_id": "15056437665-u27u27rujslf1dturllc7svmpt10ldn9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ringameal.driver",
+            "certificate_hash": "3e4bf787f8594c84161c443851528880ef52c32d"
+          }
+        },
+        {
+          "client_id": "15056437665-7ec048rkqdvfsvodvib7kpq6f1b6pnp9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDI2CQ5E3eLmKO69iDeLHRmVt3wLBOTo1k"
+        },
+        {
+          "current_key": "AIzaSyBL3j9oepD7EXLfiCQX6P09dhreiERZvTc"
+        },
+        {
+          "current_key": "AIzaSyCRmwk9YarjxizmqDUeKzet2OPznjwd8-0"
+        },
+        {
+          "current_key": "AIzaSyDXXJtJxO-ogkDuH_oJRN5_1UzofpprrWU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "15056437665-7ec048rkqdvfsvodvib7kpq6f1b6pnp9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "15056437665-b1m128i9724p7uc69pgik6d5q6saonqp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ringameal.customer",
+                "app_store_id": "1436691199"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:15056437665:android:6dbdead3dc710584",
+        "android_client_info": {
+          "package_name": "com.ringameal.restaurant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "15056437665-gkmg2tdn14td4rjf1bmi60uij6u64pcm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ringameal.restaurant",
+            "certificate_hash": "e09f65e1153aa64cc43ee604669ec06ec716749e"
+          }
+        },
+        {
+          "client_id": "15056437665-l9sf8bdqbob48r1c58f3mu1ihqbgqdei.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ringameal.restaurant",
+            "certificate_hash": "3e4bf787f8594c84161c443851528880ef52c32d"
+          }
+        },
+        {
+          "client_id": "15056437665-ml6b99k01s9a0u9ih30fv48sbvqbo4uo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ringameal.restaurant",
+            "certificate_hash": "93308a24ca09f6a80eb420bc8bacfb5a6ab11d36"
+          }
+        },
+        {
+          "client_id": "15056437665-7ec048rkqdvfsvodvib7kpq6f1b6pnp9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDI2CQ5E3eLmKO69iDeLHRmVt3wLBOTo1k"
+        },
+        {
+          "current_key": "AIzaSyBL3j9oepD7EXLfiCQX6P09dhreiERZvTc"
+        },
+        {
+          "current_key": "AIzaSyCRmwk9YarjxizmqDUeKzet2OPznjwd8-0"
+        },
+        {
+          "current_key": "AIzaSyDXXJtJxO-ogkDuH_oJRN5_1UzofpprrWU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "15056437665-7ec048rkqdvfsvodvib7kpq6f1b6pnp9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "15056437665-b1m128i9724p7uc69pgik6d5q6saonqp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ringameal.customer",
+                "app_store_id": "1436691199"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
