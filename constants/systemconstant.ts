@@ -6,3 +6,4 @@ export const enum ToastType {
     _success='success',
     _info='info'
 }
+export const driverNode:string='delivers'

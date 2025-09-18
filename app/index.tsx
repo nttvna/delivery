@@ -44,7 +44,7 @@ const Login = () => {
       const user = userCredential.user;
       // Access the UID here
       const uid = user.uid;
-      dispatch(login({ user: user.uid, token: 'abc12345' }));
+      dispatch(login({ userId: user.uid, token: 'abc12345' }));
       router.replace('/(tabs)');
     } catch (error) {
       console.error('Sign-in error:', error);
@@ -69,7 +69,7 @@ const Login = () => {
       console.log('User UID:', uid);
       await SecureStore.setItemAsync('userEmail', email);
       await SecureStore.setItemAsync('userPassword', password);
-      dispatch(login({ user: user.uid, token: 'abc12345' }));
+      dispatch(login({ userId: user.uid, token: 'abc12345' }));
       router.replace('/(tabs)');
       // You can now navigate to another screen or update your app state
     } catch (error) {

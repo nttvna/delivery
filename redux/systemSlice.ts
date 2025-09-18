@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 // Define the initial state for the slice
 const initialState = {
-    user: ''
+    userId: ''
 };
 
 // Create the slice
@@ -12,11 +12,11 @@ const systemSlice = createSlice({
     reducers: {
         // Reducer to handle a successful login
         login: (state, action) => {
-            state.user = action.payload.user;
+            state.userId = action.payload.userId;
         },
         // Reducer to handle a logout
         logout: (state) => {
-            state.user = '';
+            state.userId = '';
         },
     },
 });

@@ -1,11 +1,14 @@
-import { mainColor } from '@/constants/systemconstant';
+import { driverNode, mainColor } from '@/constants/systemconstant';
+import { useAppSelector } from '@/redux/reduxhooks';
+import { db } from '@/scripts/firebaseConfig';
 import * as Location from 'expo-location';
+import { onValue, ref } from "firebase/database";
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Switch, Text, View } from 'react-native';
 import MapView from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 const MapScreen = () => {
+  const { userId } = useAppSelector(state => state.System);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [isSwitchEnabled, setIsSwitchEnabled] = useState(false);
@@ -23,7 +26,24 @@ const MapScreen = () => {
       setLocation(currentLocation);
     })();
   }, []);
+  // Use useEffect to set up the real-time listener for the user data
+  useEffect(() => {
+    const userRef = ref(db, `${driverNode}/${userId}`); // The path to the user's data
+    const unsubscribe = onValue(userRef, (snapshot) => {
+      if (snapshot.exists()) {
+        // Read the entire node's data
+        const data = snapshot.val();
+        console.log(data);
+      } else {
+        console.log("No data found for this user.");
+      }
+    }, (error) => {
+      console.error("Firebase read error:", error);
+    });
 
+    // Return the unsubscribe function to clean up the listener
+    return () => unsubscribe();
+  }, []); // Empty dependency array means this runs once on mount
   const toggleSwitch = () => setIsSwitchEnabled(previousState => !previousState);
 
   return (
