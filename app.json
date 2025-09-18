@@ -11,7 +11,10 @@
     "ios": {
       "supportsTablet": true,
       "googleServicesFile": "./GoogleService-Info.plist",
-      "bundleIdentifier": "com.restaurant.delivery"
+      "bundleIdentifier": "com.restaurant.delivery",
+      "config": {
+        "googleMapsApiKey": "AIzaSyA8zJ2U9wOelqekhI1HiJHTGXON5InGgmo"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -23,7 +26,12 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "googleServicesFile": "./google-services.json",
-      "package": "com.restaurant.delivery"
+      "package": "com.restaurant.delivery",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyA8zJ2U9wOelqekhI1HiJHTGXON5InGgmo"
+        }
+      }
     },
     "web": {
       "output": "static",
@@ -42,7 +50,8 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

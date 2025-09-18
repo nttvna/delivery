@@ -1,8 +1,9 @@
-import { Ionicons, IoniconsIconName } from '@react-native-vector-icons/ionicons';
+import { MaterialIconsName } from '@/models/systemtype';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { FC, useRef } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 interface Props {
-    icon?: IoniconsIconName;
+    icon?: MaterialIconsName;
     inputValue: string;
     placeHolder: string;
     keyboardType:
@@ -37,7 +38,7 @@ const InputWithIcon: FC<Props> = ({
     }
     return (
         <View style={[styles.container, dynamicStyle]}>
-            {icon && (<View style={styles.iconView}><Ionicons name={icon} color='#0284c6' size={16} /></View>)}
+            {icon && (<View style={styles.iconView}><MaterialIcons size={16} name={icon} color={'#0284c6'} /></View>)}
             <TextInput
                 ref={inputRef}
                 autoComplete='off'
@@ -51,7 +52,7 @@ const InputWithIcon: FC<Props> = ({
             />
             {inputValue && inputValue.length > 0 && <TouchableOpacity
                 onPress={clearContent} style={styles.clearView}>
-                <Ionicons name={'close-outline'} color="#333" size={20} />
+                <MaterialIcons size={20} name={'close'} color={'#333'} />
             </TouchableOpacity>}
         </View>
     );

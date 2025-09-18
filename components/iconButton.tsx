@@ -1,8 +1,9 @@
-import { Ionicons, IoniconsIconName } from '@react-native-vector-icons/ionicons';
+import { MaterialIconsName } from "@/models/systemtype";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { FC } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 interface Props {
-    icon?: IoniconsIconName;
+    icon?: MaterialIconsName;
     text: string;
     bgColor: string;
     onPress: () => void,
@@ -56,7 +57,7 @@ const IconButton: FC<Props> = ({
                 ...(width ? { width: width } : {}),
                 ...(text.length > 0 ? { gap: 8 } : {})
             }]}>
-            {icon && <Ionicons name={icon} color={iconColor ?? '#fff'} size={iconSize ?? 20} />}
+            {icon && <MaterialIcons size={iconSize ?? 20} name={icon} color={iconColor ?? '#fff'} />}
             {text && text.length > 0 && <Text style={{ color: textColor ?? '#fff' }}>{text}</Text>}
         </TouchableOpacity>
     );

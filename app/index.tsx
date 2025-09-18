@@ -7,8 +7,9 @@ import { showToast } from '@/hooks/common';
 import { login } from '@/redux/systemSlice';
 import { app } from '@/scripts/firebaseConfig'; // Your Firebase app instance
 import { router, useNavigation } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { useDispatch } from 'react-redux';
 const Login = () => {
@@ -18,6 +19,38 @@ const Login = () => {
   const navigation = useNavigation<any>();
   const dispatch = useDispatch();
   const [doLogin, { isLoading, isSuccess, isError }] = useLoginMutation();
+  useEffect(() => {
+    getCredentials();
+  }, []);
+  const getCredentials = async () => {
+    try {
+      const email = await SecureStore.getItemAsync('userEmail');
+      const password = await SecureStore.getItemAsync('userPassword');
+      if (email && password) {
+        setEmail(email);
+        setPassword(password);
+        await handleLoginCredentials(email, password);
+      } else {
+        console.log('No credentials found.');
+      }
+    } catch (error) {
+      console.error('Failed to get credentials:', error);
+    }
+  }
+  const handleLoginCredentials = async (userEmail: string, userPassword: string) => {
+    const auth = getAuth(app);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, userEmail, userPassword);
+      const user = userCredential.user;
+      // Access the UID here
+      const uid = user.uid;
+      dispatch(login({ user: user.uid, token: 'abc12345' }));
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error('Sign-in error:', error);
+    }
+
+  };
   const handleLogin = async () => {
     if (!email) {
       showToast('Please enter Email');
@@ -34,6 +67,8 @@ const Login = () => {
       // Access the UID here
       const uid = user.uid;
       console.log('User UID:', uid);
+      await SecureStore.setItemAsync('userEmail', email);
+      await SecureStore.setItemAsync('userPassword', password);
       dispatch(login({ user: user.uid, token: 'abc12345' }));
       router.replace('/(tabs)');
       // You can now navigate to another screen or update your app state
@@ -92,7 +127,7 @@ const Login = () => {
       <InputWithIcon
         inputValue={password}
         placeHolder='Password...'
-        icon='key-outline'
+        icon='key'
         keyboardType='password'
         onChangeText={updatePassword}
       />
@@ -105,7 +140,7 @@ const Login = () => {
       </View>
       <IconButton
         text='LOGIN'
-        icon='log-in-outline'
+        icon='login'
         onPress={handleLogin}
         bgColor={mainColor}
         isLoading={isLoading}
