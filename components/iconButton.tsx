@@ -1,9 +1,8 @@
-import { MaterialIconsName } from "@/models/systemtype";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { FC } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 interface Props {
-    icon?: MaterialIconsName;
+    icon?: keyof typeof MaterialIcons.glyphMap;
     text: string;
     bgColor: string;
     onPress: () => void,

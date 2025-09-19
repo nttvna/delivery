@@ -1,9 +1,8 @@
-import { MaterialIconsName } from '@/models/systemtype';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { FC, useRef } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 interface Props {
-    icon?: MaterialIconsName;
+    icon?: keyof typeof MaterialIcons.glyphMap;
     inputValue: string;
     placeHolder: string;
     keyboardType:

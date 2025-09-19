@@ -14,6 +14,7 @@ export default function RootLayout() {
         </Stack>
       </SafeAreaProvider>
       <Toast />
+     
     </Provider>
   );
 }
