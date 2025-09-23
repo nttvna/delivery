@@ -8,6 +8,9 @@ export const enum ToastType {
 }
 export const driverNode: string = 'delivers';
 export const orderNode: string = 'orders';
+export const enum DriverNodeChild {
+    _workstatus = 'workstatus'
+}
 export const enum OrderNodeChild {
     _orderstatus = 'orderstatus',
     _restaurantName = 'restaurantname',
@@ -24,9 +27,12 @@ export const enum OrderNodeChild {
     _assignForUserid = 'assignforuserid',
     _instructionsRes = 'instructionsRes',
     _instructionsDeliver = 'instructionsDeliver',
+    _infoFeedback = 'infofeedback',
     _ordertextinfoforapp = 'ordertextinfoforapp',
     _serviceFeeeForCustomer = 'serviceFeeeForCustomer',
-    _serviceFeeeForCustomer = 'serviceFeeeForCustomer',
+    _tipForDeliverserviceFeeeForCustomer = 'tipForDeliver',
+    _restaurantLat = 'restaurantLat',
+    _restaurantLng = 'restaurantLng',
 }
 export const enum OrderStatus {
     _NEW = 'NEW',

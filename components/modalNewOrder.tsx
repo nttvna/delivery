@@ -1,14 +1,19 @@
 import { orderNode, OrderNodeChild, OrderStatus } from '@/constants/systemconstant';
+import { NewOrderModel } from '@/models/reduxmodel';
 import { useAppSelector } from '@/redux/reduxhooks';
+import { addOrder } from '@/redux/systemSlice';
 import { db } from '@/scripts/firebaseConfig';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { equalTo, off, onChildAdded, orderByChild, query, ref } from 'firebase/database';
+import { getDistance } from 'geolib';
 import { useEffect, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
+import { useDispatch } from 'react-redux';
 const ModalNewOrder = () => {
     const [modalVisible, setModalVisible] = useState<boolean>(false);
-    const [newOrder, setNewOrder] = useState(null);
-    const { userId } = useAppSelector(state => state.System);
+    const [newOrder, setNewOrder] = useState<NewOrderModel | null>(null);
+    const { userId, driverLat, driverLng } = useAppSelector(state => state.System);
+    const [distance, setDistance] = useState<string>('');
+    const dispatch = useDispatch();
     useEffect(() => {
         const ordersRef = query(
             ref(db, orderNode),
@@ -18,12 +23,25 @@ const ModalNewOrder = () => {
         // Listener for new orders
         const onNewOrder = onChildAdded(ordersRef, (snapshot) => {
             const orderData = snapshot.val();
-            setNewOrder(orderData);
-            console.log('orderData');
-            console.log(orderData);
-            setModalVisible(true);
-            // Optional: Clean up the listener after the first new order to prevent multiple triggers
-            // off(ordersRef, 'child_added', onNewOrder);
+            if (orderData.assignforuserid = userId) {
+                console.log(orderData);
+                const { restaurantLat, restaurantLng } = orderData;
+                setNewOrder(orderData);
+                const destination = {
+                    latitude: restaurantLat,
+                    longitude: restaurantLng,
+                };
+                console.log('destination');
+                console.log(destination);
+                const distInMeters = getDistance(
+                    { latitude: driverLat, longitude: driverLng },
+                    destination
+                );
+                const distInMiles = (distInMeters / 1609.34).toFixed(2); // 1609.34 meters per mile
+                setDistance(distInMiles);
+                dispatch(addOrder({ deliveryLat: orderData.deliveryLat, deliveryLng: orderData.deliveryLng, orderId: orderData.uid }));
+                setModalVisible(true);
+            }
         });
 
         // Clean up the listener when the component unmounts
@@ -42,12 +60,15 @@ const ModalNewOrder = () => {
         >
             <View style={styles.centeredView}>
                 <View style={styles.modalView}>
-                    <View style={styles.modalHeader}>
-                        <MaterialIcons size={25} name={'article'} color={'#333'} />
-                        <Text style={{
-                            color: '#333',
-                            fontWeight: 'bold',
-                        }}>NEW ORDER</Text>
+                    <View style={styles.row}>
+                        <View style={styles.columnleft}>
+                            <Text style={{
+                                color: '#333',
+                            }}>Restaurant:</Text>
+                        </View>
+                        <View style={styles.columnright}>
+
+                        </View>
                     </View>
                     <View style={styles.row}>
                         <View style={styles.columnleft}>

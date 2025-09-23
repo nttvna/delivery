@@ -1,0 +1,44 @@
+export interface NewOrderModel {
+    Id: string;
+    assignMode: number;
+    assignforuserid: number;
+    customeraddress: string;
+    customeremail: string;
+    customerid: number;
+    customername: string;
+    customerphone: string;
+    deliverapprove: string;
+    delivername: string;
+    deliveryLat: number;
+    deliveryLng: number;
+    deliveryTime: string;
+    distanceFromResToCus: string;
+    durationFromResToCus: string;
+    fee: number;
+    feeForDeliver: number;
+    infofeedback: string;
+    instructionsDeliver: string;
+    instructionsRes: string;
+    orderTime: string;
+    orderTimeOnServer: number;
+    orderType: string;
+    orderstatus: string;
+    ordertextinfo: string;
+    ordertextinfoforapp: string;
+    ordertextinfofordeliver: string;
+    paymentTypeId: number;
+    restaurantId: number;
+    restaurantLat: number;
+    restaurantLng: number;
+    restaurantaddress: string;
+    restaurantname: string;
+    restaurantphone: string;
+    restaurantshortaddress: string;
+    tipForDeliver: number;
+}
+export interface SystemState {
+    userId: string;
+    driverLat: number;
+    driverLng: number;
+    currentOrder: NewOrderModel | null
+}

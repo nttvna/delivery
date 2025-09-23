@@ -1,3 +1,4 @@
+import { LoctionProvier } from '@/hooks/loctionProvier';
 import { store } from '@/redux/store';
 import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -6,15 +7,15 @@ import { Provider } from 'react-redux';
 export default function RootLayout() {
   return (
     <Provider store={store}>
-      <SafeAreaProvider>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-        </Stack>
-      </SafeAreaProvider>
-      <Toast />
-     
+      <LoctionProvier>
+        <SafeAreaProvider>
+          <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          </Stack>
+        </SafeAreaProvider>
+        <Toast />
+      </LoctionProvier>
     </Provider>
   );
 }

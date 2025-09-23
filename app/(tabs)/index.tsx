@@ -1,90 +1,84 @@
-import { driverNode, mainColor } from '@/constants/systemconstant';
+import { driverNode, DriverNodeChild, mainColor } from '@/constants/systemconstant';
 import { showToast } from '@/hooks/common';
 import { useAppSelector } from '@/redux/reduxhooks';
 import { db } from '@/scripts/firebaseConfig';
 import * as Location from 'expo-location';
-import { onValue, ref, update } from "firebase/database";
+import { get, ref, update } from "firebase/database";
+import { getDistance } from 'geolib';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Switch, Text, View } from 'react-native';
-import MapView, { Region } from 'react-native-maps';
+import MapView, { Marker, Polyline } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+type LocationObject = {
+  latitude: number;
+  longitude: number;
+};
 const MapScreen = () => {
-  const { userId } = useAppSelector(state => state.System);
-  const [region, setRegion] = useState<Region | undefined>(undefined);
+  const { userId, currentOrder } = useAppSelector(state => state.System);
+  const [userLocation, setUserLocation] = useState<LocationObject | null>(null);
   const insets = useSafeAreaInsets(); // Get the safe area insets
   const [userStatus, setUserStatus] = useState<boolean | null>(null);
-  const userRef = ref(db, `${driverNode}/${userId}`); // The path to the user's data
+  const [distance, setDistance] = useState<string>('');
   useEffect(() => {
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        showToast('Permission to access location was denied');
-        return;
+      if (userId) {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          showToast('Permission to access location was denied');
+          return;
+        }
+        // Get initial location
+        let initialLocation = await Location.getCurrentPositionAsync({});
+        const { latitude, longitude } = initialLocation.coords;
+        setUserLocation({ latitude, longitude });
+
+        if (currentOrder) {
+          const { restaurantLat, restaurantLng } = currentOrder;
+          const destination = {
+            latitude: restaurantLat,
+            longitude: restaurantLng,
+          };
+          console.log('destination');
+          console.log(destination);
+          const distInMeters = getDistance(
+            { latitude, longitude },
+            destination
+          );
+          const distInMiles = (distInMeters / 1609.34).toFixed(2); // 1609.34 meters per mile
+          setDistance(distInMiles);
+        }
+
       }
 
-      // Get initial location
-      let initialLocation = await Location.getCurrentPositionAsync({});
-      const initialRegion = {
-        latitude: initialLocation.coords.latitude,
-        longitude: initialLocation.coords.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      };
-      setRegion(initialRegion);
-      // Start watching for location updates
-      const subscriber = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.BestForNavigation,
-          distanceInterval: 5, // Update every 5 meters
-        },
-        (newLocation) => {
-          updateLocation(newLocation.coords.latitude, newLocation.coords.longitude);
-        }
-      );
-
-      // Clean up the subscription
-      return () => {
-        if (subscriber) {
-          subscriber.remove();
-        }
-      };
     })();
-  }, []);
-  const updateLocation = (lat: number, long: number) => {
-    update(userRef, {
-      lat: lat.toFixed(6),
-      lng: long.toFixed(6)
-    })
-      .then(() => {
-        console.log('position updated');
-      })
-      .catch((error) => {
-        console.log("position update failed:");
-      });
-  };
-  // Use useEffect to set up the real-time listener for the user data
+  }, [userId]);
   useEffect(() => {
-    const unsubscribe = onValue(userRef, (snapshot) => {
-      if (snapshot.exists()) {
-        // Read the entire node's data
-        const data = snapshot.val();
-        const { workstatus } = data;
-        setUserStatus(workstatus);
-      } else {
-        showToast("No data found for this user.");
+    const fetchWorkStatus = async () => {
+      try {
+        const workStatusRef = ref(db, `${driverNode}/${userId}/${DriverNodeChild._workstatus}`);
+        const snapshot = await get(workStatusRef);
+        if (snapshot.exists()) {
+          const status = snapshot.val();
+          setUserStatus(status);
+          console.log("Work status fetched:", status);
+        } else {
+          console.log("No work status available for this order.");
+          setUserStatus(false);
+        }
+      } catch (error) {
+        console.error("Error fetching work status:", error);
+        setUserStatus(false);
       }
-    }, (error) => {
-      showToast("Firebase read error:");
-    });
+    };
 
-    // Return the unsubscribe function to clean up the listener
-    return () => unsubscribe();
-  }, []); // Empty dependency array means this runs once on mount
+    fetchWorkStatus();
+  }, [userId, db]); // Reruns the effect if orderId or db changes
+
   const toggleSwitch = () => {
     if (userStatus !== null) {
-      // Call update() on the user's reference with the updates object
+      const driverRef = ref(db, `${driverNode}/${userId}`);
       const newval: boolean = !userStatus;
-      update(userRef, {
+      update(driverRef, {
         workstatus: newval
       })
         .then(() => {
@@ -125,13 +119,31 @@ const MapScreen = () => {
       </View>
 
       {/* Map View */}
-      {region ? (
+      {userLocation ? (
         <MapView
           style={styles.map}
-          initialRegion={region}
+          initialRegion={{
+            latitude: userLocation?.latitude,
+            longitude: userLocation.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
           showsUserLocation={true}
           followsUserLocation={true}
-        />
+        >
+          {distance && currentOrder && (
+            <>
+              <Marker coordinate={userLocation} title="Your Location" />
+              <Marker coordinate={{ latitude: currentOrder.restaurantLat, longitude: currentOrder.restaurantLng }} title="Destination" pinColor="blue" />
+              <Polyline
+                coordinates={[userLocation, { latitude: currentOrder.restaurantLat, longitude: currentOrder.restaurantLng }]}
+                strokeColor="#000"
+                strokeWidth={4}
+              />
+            </>
+          )}
+
+        </MapView>
       ) : (
         <View style={styles.loadingContainer}>
           <Text>{'Loading map...'}</Text>
