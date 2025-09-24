@@ -35,6 +35,21 @@ export interface NewOrderModel {
     restaurantphone: string;
     restaurantshortaddress: string;
     tipForDeliver: number;
+    ordertextinfoforappObject:OrderDetail| null;
+}
+export interface OrderDetail {
+    Items: Item[];
+    SubTotal: string;
+    Tax: string;
+    Promotion: string;
+    PromotionDetail: string;
+    Total: string;
+}
+export interface Item {
+    Name: string;
+    AdditionalInfo: string;
+    Quantity: number;
+    Amount: string;
 }
 export interface SystemState {
     userId: string;

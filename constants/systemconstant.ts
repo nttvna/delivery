@@ -42,4 +42,5 @@ export const enum OrderStatus {
     _CANCELRESTAURANT = 'CANCELRESTAURANT',
     _CANCEL = 'CANCEL',
     _REFUSE = 'REFUSE',
+    _ACCEPT = 'ACCEPT',
 }

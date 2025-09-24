@@ -6,7 +6,7 @@ interface Props {
     text: string;
     bgColor: string;
     onPress: () => void,
-    isLoading: boolean;
+    isLoading?: boolean;
     width?: number;
     height?: number;
     size: 'md' | 'sm';
