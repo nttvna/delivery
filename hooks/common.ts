@@ -9,17 +9,15 @@ export function showToast(content: string, type: ToastType = ToastType._error) {
     });
 };
 export function formatMoney(amount: number | undefined) {
-    if (amount) {
-        try {
-            const formatter = new Intl.NumberFormat('en-Us', {
-                style: 'currency',
-                currency: 'USD'
-            });
-            return formatter.format(amount);
-        } catch (error) {
+    if (!amount) amount = 0;
+    try {
+        const formatter = new Intl.NumberFormat('en-Us', {
+            style: 'currency',
+            currency: 'USD'
+        });
+        return formatter.format(amount);
+    } catch (error) {
 
-        }
-        return amount.toFixed(2);
     }
-    return '';
+    return amount.toFixed(2);
 };

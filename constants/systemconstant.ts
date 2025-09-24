@@ -6,6 +6,7 @@ export const enum ToastType {
     _success = 'success',
     _info = 'info'
 }
+export const GOOGLE_MAPS_API_KEY = 'AIzaSyBn3QNw0j5aVViWDmqzWDahtNhVFiIAJJg';
 export const driverNode: string = 'delivers';
 export const orderNode: string = 'orders';
 export const enum DriverNodeChild {

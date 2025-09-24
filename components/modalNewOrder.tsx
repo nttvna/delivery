@@ -4,6 +4,7 @@ import { NewOrderModel, OrderDetail } from '@/models/reduxmodel';
 import { useAppSelector } from '@/redux/reduxhooks';
 import { addOrder, clearOrder } from '@/redux/systemSlice';
 import { db } from '@/scripts/firebaseConfig';
+import { Audio } from 'expo-av';
 import { equalTo, off, onChildAdded, orderByChild, query, ref, update } from 'firebase/database';
 import { getDistance } from 'geolib';
 import { useEffect, useState } from 'react';
@@ -15,7 +16,50 @@ const ModalNewOrder = () => {
     const [newOrder, setNewOrder] = useState<NewOrderModel | null>(null);
     const { userId, driverLat, driverLng } = useAppSelector(state => state.System);
     const [distance, setDistance] = useState<string>('');
+    const [sound, setSound] = useState<Audio.Sound | null>(null);
     const dispatch = useDispatch();
+    async function loadSound() {
+        console.log('Loading Sound...');
+        try {
+            const { sound } = await Audio.Sound.createAsync(
+                // This is a placeholder for your sound file.
+                // Replace it with the path to your .mp3, .wav, or .m4a file.
+                // For example: require('./assets/notification.mp3')
+                require('@/assets/audio/notification.mp3')
+            );
+            setSound(sound);
+            return sound; // Return the sound object
+        } catch (error) {
+            console.error('Error loading sound:', error);
+            return null; // Return null on error
+        }
+    }
+    const playSound = async () => {
+        if (sound) {
+            console.log('Playing Sound...');
+            try {
+                await sound.playAsync();
+            } catch (error) {
+                console.error('Error playing sound:', error);
+            }
+        } else {
+            console.warn('Sound not loaded yet. Trying to load...');
+            const loadedSound = await loadSound(); // Get the returned sound object
+            if (loadedSound) {
+                await loadedSound.playAsync();
+            }
+        }
+    };
+    useEffect(() => {
+        loadSound();
+        return () => {
+            // Clean up the sound object when the component unmounts
+            if (sound) {
+                console.log('Unloading Sound...');
+                sound.unloadAsync();
+            }
+        };
+    }, []);
     useEffect(() => {
         const ordersRef = query(
             ref(db, orderNode),
@@ -40,10 +84,6 @@ const ModalNewOrder = () => {
                     Id: nodeId,
                     ordertextinfoforappObject: orderInfoForApp
                 };
-                console.log('orderObject');
-                console.log(orderInfoForApp);
-                console.log('------------');
-                console.log(orderInfoForApp?.Items);
                 setNewOrder(orderObject);
                 const destinationRestaurant = {
                     latitude: restaurantLat,
@@ -54,7 +94,9 @@ const ModalNewOrder = () => {
                     destinationRestaurant
                 );
                 const distInMiles = ((distDriverToRestaurantInMeters) / 1609.34).toFixed(2); // 1609.34 meters per mile
+                dispatch(addOrder({ order: newOrder }));
                 setDistance(distInMiles);
+                playSound();
                 setModalVisible(true);
             }
         });
@@ -71,7 +113,7 @@ const ModalNewOrder = () => {
                 assignforuserid: userId
             })
                 .then(() => {
-                    dispatch(addOrder({ order: newOrder }));
+
                     setModalVisible(false);
                 })
                 .catch((error) => {
@@ -211,9 +253,9 @@ const styles = StyleSheet.create({
     },
     centeredView: {
         flex: 1,
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
         alignItems: 'center',
-        marginTop: 22,
+        marginBottom: 50,
         backgroundColor: 'transparent', // Semi-transparent black overlay
     },
     modalView: {
@@ -230,6 +272,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
+        width: '60%'
     },
     modalText: {
         marginBottom: 15,

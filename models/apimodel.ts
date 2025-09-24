@@ -14,3 +14,8 @@ export interface DeliverUserProfile {
     Email: string;
 }
 
+export interface MapLocation {
+    latitude: number;
+    longitude: number;
+}
+
