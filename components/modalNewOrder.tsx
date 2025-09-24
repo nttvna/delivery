@@ -1,5 +1,5 @@
 import { orderNode, OrderNodeChild, OrderStatus } from '@/constants/systemconstant';
-import { showToast } from '@/hooks/common';
+import { formatMoney, showToast } from '@/hooks/common';
 import { NewOrderModel, OrderDetail } from '@/models/reduxmodel';
 import { useAppSelector } from '@/redux/reduxhooks';
 import { addOrder, clearOrder } from '@/redux/systemSlice';
@@ -34,13 +34,16 @@ const ModalNewOrder = () => {
                 } catch (e) {
                     console.error("Failed to parse ordertextinfoforapp:", e);
                 }
+                const nodeId = snapshot.key;
                 const orderObject = {
                     ...orderData,
-                    Id: orderData.uid,
+                    Id: nodeId,
                     ordertextinfoforappObject: orderInfoForApp
                 };
                 console.log('orderObject');
-                console.log(orderObject);
+                console.log(orderInfoForApp);
+                console.log('------------');
+                console.log(orderInfoForApp?.Items);
                 setNewOrder(orderObject);
                 const destinationRestaurant = {
                     latitude: restaurantLat,
@@ -64,7 +67,8 @@ const ModalNewOrder = () => {
         if (newOrder) {
             const orderRef = ref(db, `${orderNode}/${newOrder.Id}`);
             update(orderRef, {
-                orderstatus: OrderStatus._ACCEPT
+                orderstatus: OrderStatus._ACCEPT,
+                assignforuserid: userId
             })
                 .then(() => {
                     dispatch(addOrder({ order: newOrder }));
@@ -77,17 +81,8 @@ const ModalNewOrder = () => {
     };
     const cancelOrder = () => {
         if (newOrder) {
-            const orderRef = ref(db, `${orderNode}/${newOrder.Id}`);
-            update(orderRef, {
-                assignforuserid: ''
-            })
-                .then(() => {
-                    dispatch(clearOrder(undefined));
-                    setModalVisible(false);
-                })
-                .catch((error) => {
-                    showToast("update failed");
-                });
+            dispatch(clearOrder(undefined));
+            setModalVisible(false);
         }
     };
     return (
@@ -105,10 +100,13 @@ const ModalNewOrder = () => {
                         <View style={styles.columnleft}>
                             <Text style={{
                                 color: '#333',
-                            }}> {distance}{' mi'}</Text>
+                            }}>{distance}{' mi'}</Text>
                         </View>
                         <View style={styles.columnright}>
-                            {newOrder?.ordertextinfoforappObject?.Total}
+                            <Text style={{
+                                color: '#333',
+                            }}>{'Tip: '}{formatMoney(newOrder?.tipForDeliver)}</Text>
+
                         </View>
                     </View>
                     {newOrder && newOrder.ordertextinfoforappObject && (
@@ -124,7 +122,7 @@ const ModalNewOrder = () => {
                                                 color: '#333'
                                             }}>{item.Name}</Text>
                                         </View>
-                                        {item.AdditionalInfo && <Text style={{
+                                        {item.AdditionalInfo && item.AdditionalInfo !== '' && <Text style={{
                                             color: '#333'
                                         }}>{item.AdditionalInfo}</Text>}
                                     </View>
@@ -164,20 +162,29 @@ const ModalNewOrder = () => {
                             </View>
                         </>
                     )}
-                    <View style={{ flexGrow: 1, justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <View style={{
+                        flexDirection: 'row',
+                        gap: 12,
+                        marginTop: 24,
+                        justifyContent: 'flex-end',
+                        width: '100%',
+                    }}>
                         <IconButton
                             text='NO, THANKS'
                             onPress={cancelOrder}
                             bgColor={'#fff'}
                             borderColor='#e5e5e5'
+                            textColor='#333'
                             size='md'
+                            width={120}
                         />
                         <IconButton
                             text='ACCEPT'
                             onPress={acceptOrder}
-                            bgColor={'#fff'}
+                            bgColor={'#843535ff'}
                             borderColor='#e5e5e5'
                             size='md'
+                            width={100}
                         />
                     </View>
                 </View>
@@ -207,7 +214,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 22,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent black overlay
+        backgroundColor: 'transparent', // Semi-transparent black overlay
     },
     modalView: {
         margin: 20,
@@ -230,12 +237,13 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     modalHeader: { borderBottomColor: '#e5e5e5', borderBottomWidth: 1, paddingBottom: 10, marginBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 8 },
-    row: { flexDirection: 'row', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#e5e5e5', alignItems: 'center' },
+    row: { flexDirection: 'row', paddingVertical: 8 },
     columnleft: {
         width: 150
     },
     columnright: {
-        flexGrow: 1
+        flexGrow: 1,
+        alignItems: 'flex-end',
     },
     totalRow: {
         flexDirection: 'row',

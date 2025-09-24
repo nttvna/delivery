@@ -8,3 +8,18 @@ export function showToast(content: string, type: ToastType = ToastType._error) {
         visibilityTime: 4000
     });
 };
+export function formatMoney(amount: number | undefined) {
+    if (amount) {
+        try {
+            const formatter = new Intl.NumberFormat('en-Us', {
+                style: 'currency',
+                currency: 'USD'
+            });
+            return formatter.format(amount);
+        } catch (error) {
+
+        }
+        return amount.toFixed(2);
+    }
+    return '';
+};
