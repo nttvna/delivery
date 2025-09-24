@@ -1,12 +1,11 @@
-import { orderNode, OrderNodeChild, OrderStatus } from '@/constants/systemconstant';
-import { formatMoney, showToast } from '@/hooks/common';
+import { GOOGLE_MAPS_API_KEY, orderNode, OrderNodeChild, OrderStatus } from '@/constants/systemconstant';
+import { showToast } from '@/hooks/common';
 import { NewOrderModel, OrderDetail } from '@/models/reduxmodel';
 import { useAppSelector } from '@/redux/reduxhooks';
 import { addOrder, clearOrder } from '@/redux/systemSlice';
 import { db } from '@/scripts/firebaseConfig';
 import { Audio } from 'expo-av';
 import { equalTo, off, onChildAdded, orderByChild, query, ref, update } from 'firebase/database';
-import { getDistance } from 'geolib';
 import { useEffect, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 import { useDispatch } from 'react-redux';
@@ -16,6 +15,7 @@ const ModalNewOrder = () => {
     const [newOrder, setNewOrder] = useState<NewOrderModel | null>(null);
     const { userId, driverLat, driverLng } = useAppSelector(state => state.System);
     const [distance, setDistance] = useState<string>('');
+    const [duration, setDuration] = useState<string>('');
     const [sound, setSound] = useState<Audio.Sound | null>(null);
     const dispatch = useDispatch();
     async function loadSound() {
@@ -28,26 +28,18 @@ const ModalNewOrder = () => {
                 require('@/assets/audio/notification.mp3')
             );
             setSound(sound);
-            return sound; // Return the sound object
+            console.log('Done Sound...');
         } catch (error) {
             console.error('Error loading sound:', error);
-            return null; // Return null on error
         }
     }
     const playSound = async () => {
-        if (sound) {
-            console.log('Playing Sound...');
-            try {
-                await sound.playAsync();
-            } catch (error) {
-                console.error('Error playing sound:', error);
-            }
-        } else {
-            console.warn('Sound not loaded yet. Trying to load...');
-            const loadedSound = await loadSound(); // Get the returned sound object
-            if (loadedSound) {
-                await loadedSound.playAsync();
-            }
+        console.log('Playing Sound...');
+        try {
+            await sound?.replayAsync();
+            console.log('Played Sound...');
+        } catch (error) {
+            console.error('Error playing sound:', error);
         }
     };
     useEffect(() => {
@@ -60,6 +52,37 @@ const ModalNewOrder = () => {
             }
         };
     }, []);
+    const getDirections = async (restaurantLat: number, restaurantLng: number) => {
+        setDistance('');
+        setDuration('');
+        const origin = `${driverLat},${driverLng}`;
+        const destinationLatLng = `${restaurantLat},${restaurantLng}`;
+        // Construct the API URL using the provided variables
+        const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destinationLatLng}&key=${GOOGLE_MAPS_API_KEY}&units=imperial`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('data');
+            console.log(data.routes[0].legs[0]);
+            // Check if the API returned a valid route
+            if (data.routes.length > 0 && data.routes[0].legs.length > 0) {
+                // The distance and duration are in the first leg of the first route
+                const firstLeg = data.routes[0].legs[0];
+                setDistance(firstLeg.distance.text);
+                setDuration(firstLeg.duration.text);
+            } else {
+                console.log('No route found between the specified locations.');
+            }
+        } catch (err: any) {
+            console.error('API call failed:', err);
+            console.log(`Failed to fetch directions: ${err.message}`);
+        }
+    };
     useEffect(() => {
         const ordersRef = query(
             ref(db, orderNode),
@@ -67,7 +90,7 @@ const ModalNewOrder = () => {
             equalTo(OrderStatus._NEW)
         );
         // Listener for new orders
-        const onNewOrder = onChildAdded(ordersRef, (snapshot) => {
+        const onNewOrder = onChildAdded(ordersRef, async (snapshot) => {
             const orderData = snapshot.val();
             if (orderData.assignforuserid = userId) {
                 const { restaurantLat, restaurantLng, ordertextinfoforapp } = orderData;
@@ -84,18 +107,9 @@ const ModalNewOrder = () => {
                     Id: nodeId,
                     ordertextinfoforappObject: orderInfoForApp
                 };
+                getDirections(restaurantLat, restaurantLng);
                 setNewOrder(orderObject);
-                const destinationRestaurant = {
-                    latitude: restaurantLat,
-                    longitude: restaurantLng,
-                };
-                const distDriverToRestaurantInMeters = getDistance(
-                    { latitude: driverLat, longitude: driverLng },
-                    destinationRestaurant
-                );
-                const distInMiles = ((distDriverToRestaurantInMeters) / 1609.34).toFixed(2); // 1609.34 meters per mile
                 dispatch(addOrder({ order: newOrder }));
-                setDistance(distInMiles);
                 playSound();
                 setModalVisible(true);
             }
@@ -147,7 +161,7 @@ const ModalNewOrder = () => {
                         <View style={styles.columnright}>
                             <Text style={{
                                 color: '#333',
-                            }}>{'Tip: '}{formatMoney(newOrder?.tipForDeliver)}</Text>
+                            }}>{duration}</Text>
 
                         </View>
                     </View>

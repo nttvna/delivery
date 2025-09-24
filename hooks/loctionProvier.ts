@@ -47,7 +47,7 @@ export const LoctionProvier = ({ children }: any) => {
             lng: long.toFixed(6)
         })
             .then(() => {
-                console.log('position updated');
+                //  console.log('position updated');
             })
             .catch((error) => {
                 console.log("position update failed:");

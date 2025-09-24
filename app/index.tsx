@@ -1,12 +1,11 @@
 // LoginScreen.js
-import { useLoginMutation } from '@/api/account';
 import IconButton from '@/components/iconButton';
 import InputWithIcon from '@/components/inputWithIcon';
 import { mainColor } from '@/constants/systemconstant';
 import { showToast } from '@/hooks/common';
 import { login } from '@/redux/systemSlice';
-import { app } from '@/scripts/firebaseConfig'; // Your Firebase app instance
-import { router, useNavigation } from 'expo-router';
+import { app, auth } from '@/scripts/firebaseConfig'; // Your Firebase app instance
+import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { useEffect, useState } from 'react';
@@ -16,9 +15,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const navigation = useNavigation<any>();
   const dispatch = useDispatch();
-  const [doLogin, { isLoading, isSuccess, isError }] = useLoginMutation();
   useEffect(() => {
     getCredentials();
   }, []);
@@ -38,7 +35,6 @@ const Login = () => {
     }
   }
   const handleLoginCredentials = async (userEmail: string, userPassword: string) => {
-    const auth = getAuth(app);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, userEmail, userPassword);
       const user = userCredential.user;
@@ -66,7 +62,6 @@ const Login = () => {
       const user = userCredential.user;
       // Access the UID here
       const uid = user.uid;
-      console.log('User UID:', uid);
       await SecureStore.setItemAsync('userEmail', email);
       await SecureStore.setItemAsync('userPassword', password);
       dispatch(login({ userId: user.uid, token: 'abc12345' }));
@@ -74,28 +69,7 @@ const Login = () => {
       // You can now navigate to another screen or update your app state
     } catch (error) {
       console.error('Sign-in error:', error);
-      // Handle specific errors (e.g., wrong password, user not found)
     }
-    /*  doLogin({ token: AccessToken, strUserId: 'vs3oeDY30MPD1cJmd0REDms205s1' })
-       .unwrap()
-       .then(response => {
-         const { statusCode, messageCode, result } = response;
-         console.log('data');
-         console.log(statusCode);
-         console.log(messageCode);
-         console.log(result);
- 
-       })
-       .catch(err => {
-         console.log('err');
-         console.log(err);
-       });
-     // Hardcoded credentials for this example
-     if (email === 'admin' && password === '123') {
-       navigation.navigate('Home');
-     } else {
-       Alert.alert('Login Failed', 'Invalid username or password.');
-     } */
   };
   const updateEmail = (val: string) => {
     setError('');
@@ -143,7 +117,6 @@ const Login = () => {
         icon='login'
         onPress={handleLogin}
         bgColor={mainColor}
-        isLoading={isLoading}
         size='md'
       />
 

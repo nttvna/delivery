@@ -5,6 +5,10 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+       // The new path to fix the Firebase Auth error
+      "@firebase/auth": [
+        "./node_modules/@firebase/auth/dist/index.rn.d.ts"
       ]
     }
   },
