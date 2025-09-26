@@ -4,79 +4,58 @@ import { NewOrderModel, OrderDetail } from '@/models/reduxmodel';
 import { useAppSelector } from '@/redux/reduxhooks';
 import { addOrder, clearOrder } from '@/redux/systemSlice';
 import { db } from '@/scripts/firebaseConfig';
-import { Audio } from 'expo-av';
+import { useAudioPlayer } from 'expo-audio'; // Corrected import
 import { equalTo, off, onChildAdded, orderByChild, query, ref, update } from 'firebase/database';
 import { useEffect, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
 import { useDispatch } from 'react-redux';
 import IconButton from './iconButton';
+const audioSource = require('@/assets/audio/notification.mp3');
 const ModalNewOrder = () => {
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [newOrder, setNewOrder] = useState<NewOrderModel | null>(null);
     const { userId, driverLat, driverLng } = useAppSelector(state => state.System);
     const [distance, setDistance] = useState<string>('');
     const [duration, setDuration] = useState<string>('');
-    const [sound, setSound] = useState<Audio.Sound | null>(null);
     const dispatch = useDispatch();
-    async function loadSound() {
-        console.log('Loading Sound...');
-        try {
-            const { sound } = await Audio.Sound.createAsync(
-                // This is a placeholder for your sound file.
-                // Replace it with the path to your .mp3, .wav, or .m4a file.
-                // For example: require('./assets/notification.mp3')
-                require('@/assets/audio/notification.mp3')
-            );
-            setSound(sound);
-            console.log('Done Sound...');
-        } catch (error) {
-            console.error('Error loading sound:', error);
-        }
-    }
-    const playSound = async () => {
+    const player = useAudioPlayer(audioSource);
+    const playSound = () => {
         console.log('Playing Sound...');
         try {
-            await sound?.replayAsync();
+            player.play();
             console.log('Played Sound...');
         } catch (error) {
             console.error('Error playing sound:', error);
         }
     };
-    useEffect(() => {
-        loadSound();
-        return () => {
-            // Clean up the sound object when the component unmounts
-            if (sound) {
-                console.log('Unloading Sound...');
-                sound.unloadAsync();
-            }
-        };
-    }, []);
     const getDirections = async (restaurantLat: number, restaurantLng: number) => {
-        setDistance('');
-        setDuration('');
         const origin = `${driverLat},${driverLng}`;
         const destinationLatLng = `${restaurantLat},${restaurantLng}`;
         // Construct the API URL using the provided variables
         const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destinationLatLng}&key=${GOOGLE_MAPS_API_KEY}&units=imperial`;
-
         try {
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-
+            console.log('url');
+            console.log(url);
             const data = await response.json();
-            console.log('data');
-            console.log(data.routes[0].legs[0]);
-            // Check if the API returned a valid route
-            if (data.routes.length > 0 && data.routes[0].legs.length > 0) {
-                // The distance and duration are in the first leg of the first route
+            // The error occurs on the next line because data.routes is an empty array
+            // console.log(data.routes[0].legs[0]); 
+
+            // Add a check to ensure the routes and legs arrays exist and have elements
+            if (data.routes && data.routes.length > 0 && data.routes[0].legs && data.routes[0].legs.length > 0) {
                 const firstLeg = data.routes[0].legs[0];
                 setDistance(firstLeg.distance.text);
                 setDuration(firstLeg.duration.text);
+                console.log('Distance:', firstLeg.distance.text);
+                console.log('Duration:', firstLeg.duration.text);
             } else {
-                console.log('No route found between the specified locations.');
+                console.log('No valid route data found in the API response.');
+                // Handle the case where no route is found, for example, by setting a default message
+                setDistance('N/A');
+                setDuration('N/A');
             }
         } catch (err: any) {
             console.error('API call failed:', err);
@@ -109,9 +88,7 @@ const ModalNewOrder = () => {
                 };
                 getDirections(restaurantLat, restaurantLng);
                 setNewOrder(orderObject);
-                dispatch(addOrder({ order: newOrder }));
-                playSound();
-                setModalVisible(true);
+
             }
         });
         // Clean up the listener when the component unmounts
@@ -119,6 +96,13 @@ const ModalNewOrder = () => {
             off(ordersRef, 'child_added', onNewOrder);
         };
     }, [userId]);
+    useEffect(() => {
+        if (distance && duration) {
+            dispatch(addOrder({ order: newOrder }));
+            playSound();
+            setModalVisible(true);
+        }
+    }, [distance, duration]);
     const acceptOrder = () => {
         if (newOrder) {
             const orderRef = ref(db, `${orderNode}/${newOrder.Id}`);
@@ -127,7 +111,8 @@ const ModalNewOrder = () => {
                 assignforuserid: userId
             })
                 .then(() => {
-
+                    setDistance('');
+                    setDuration('');
                     setModalVisible(false);
                 })
                 .catch((error) => {
@@ -138,6 +123,8 @@ const ModalNewOrder = () => {
     const cancelOrder = () => {
         if (newOrder) {
             dispatch(clearOrder(undefined));
+            setDistance('');
+            setDuration('');
             setModalVisible(false);
         }
     };

@@ -2,49 +2,40 @@ import { driverNode, DriverNodeChild, GOOGLE_MAPS_API_KEY, mainColor } from '@/c
 import { showToast } from '@/hooks/common';
 import { MapLocation } from '@/models/apimodel';
 import { useAppSelector } from '@/redux/reduxhooks';
+import { updateWorkStatus } from '@/redux/systemSlice';
 import { db } from '@/scripts/firebaseConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import polyline from '@mapbox/polyline';
-import * as Location from 'expo-location';
 import { get, ref, update } from "firebase/database";
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Switch, Text, View } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-type LocationObject = {
+import { useDispatch } from 'react-redux';
+interface LocationObject {
   latitude: number;
   longitude: number;
-};
+  // Add any other properties your location object might have (e.g., 'timestamp', 'altitude')
+}
 const MapScreen = () => {
-  const { userId, currentOrder } = useAppSelector(state => state.System);
+  const { userId, currentOrder, driverLat, driverLng, workstatus } = useAppSelector(state => state.System);
   const [userLocation, setUserLocation] = useState<LocationObject | null>(null);
   const insets = useSafeAreaInsets(); // Get the safe area insets
-  const [userStatus, setUserStatus] = useState<boolean | null>(null);
   const [polylineCoordinates, setPolylineCoordinates] = useState<MapLocation[]>([]);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const dispatch = useDispatch();
   useEffect(() => {
-    (async () => {
-      if (userId) {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          setError('Permission to access location was denied');
-          return;
-        }
-        // Get initial location
-        let initialLocation = await Location.getCurrentPositionAsync({});
-        const { latitude, longitude } = initialLocation.coords;
-        setUserLocation({ latitude, longitude });
-      }
-
-    })();
-  }, [userId]);
-  useEffect(() => {
-    if (currentOrder && userLocation) {
+    console.log('driverLat');
+    console.log(driverLat);
+    console.log(driverLng);
+    if (driverLat && driverLng) {
+      setUserLocation({ latitude: driverLat, longitude: driverLng });
+    }
+    if (currentOrder && driverLat && driverLng) {
       fetchDirections();
     }
 
-  }, [currentOrder, userLocation]);
+  }, [currentOrder, driverLat, driverLng]);
   useEffect(() => {
     const fetchWorkStatus = async () => {
       try {
@@ -52,14 +43,14 @@ const MapScreen = () => {
         const snapshot = await get(workStatusRef);
         if (snapshot.exists()) {
           const status = snapshot.val();
-          setUserStatus(status);
+          dispatch(updateWorkStatus({ workstatus: status }));
         } else {
           setError("No work status available");
-          setUserStatus(false);
+          dispatch(updateWorkStatus({ workstatus: false }));
         }
       } catch (error) {
         setError("Error fetching work status:");
-        setUserStatus(false);
+        dispatch(updateWorkStatus({ workstatus: false }));
       }
     };
 
@@ -70,15 +61,9 @@ const MapScreen = () => {
       setError('Missing location data');
       return;
     }
-
-    setLoading(true);
     setError('');
-    const destination = {
-      latitude: currentOrder.restaurantLat,
-      longitude: currentOrder.restaurantLng,
-    };
     const origin = `${userLocation.latitude},${userLocation.longitude}`;
-    const destinationLatLng = `${destination.latitude},${destination.longitude}`;
+    const destinationLatLng = `${currentOrder.restaurantLat},${currentOrder.restaurantLng}`;
 
     // Construct the API URL for directions
     const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destinationLatLng}&key=${GOOGLE_MAPS_API_KEY}`;
@@ -101,26 +86,23 @@ const MapScreen = () => {
     } catch (err) {
       console.error('Error fetching directions:', err);
       setError('Failed to fetch route. Please check your network or API key.');
-    } finally {
-      setLoading(false);
-    }
+    };
   };
   const toggleSwitch = () => {
-    if (userStatus !== null) {
+    if (workstatus !== null) {
       const driverRef = ref(db, `${driverNode}/${userId}`);
-      const newval: boolean = !userStatus;
+      const newval: boolean = !workstatus;
       update(driverRef, {
         workstatus: newval
       })
         .then(() => {
-          setUserStatus(newval);
+          dispatch(updateWorkStatus({ workstatus: newval }));
         })
         .catch((error) => {
           showToast("update failed");
         });
     }
   };
-
   return (
     <View style={styles.container}>
       {/* Header View with dynamic top padding */}
@@ -138,53 +120,47 @@ const MapScreen = () => {
           fontWeight: 'bold',
         }}>Home</Text>
         <View style={{ flexGrow: 1, justifyContent: 'flex-end', flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Text style={{ color: '#fff' }}>{userStatus ? 'Online' : 'Offline'}</Text>
+          <Text style={{ color: '#fff' }}>{workstatus ? 'Online' : 'Offline'}</Text>
           <Switch
             onValueChange={toggleSwitch}
-            value={userStatus ?? false}
+            value={workstatus ?? false}
             trackColor={{ false: '#767577', true: mainColor }}
-            thumbColor={userStatus ? '#f5dd4b' : '#f4f3f4'}
+            thumbColor={workstatus ? '#f5dd4b' : '#f4f3f4'}
             ios_backgroundColor={'#3e3e3e'}
           />
         </View>
       </View>
-      {loading || !userLocation && <View style={styles.loadingContainer}>
+      {!userLocation && <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} />
       </View>}
       {error && <Text style={styles.errorText}>{error}</Text>}
-      {/* Map View */}
-      {userLocation && (
-        <MapView
-          style={styles.map}
-          initialRegion={{
-            latitude: userLocation.latitude,
-            longitude: userLocation.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}
-          showsUserLocation={true}
-        >
-          <Marker coordinate={userLocation} title="Your Location" >
-            <MaterialIcons name={'directions-car-filled'} size={30} color="#e74c3c" />
-          </Marker>
-          {currentOrder && (
-            <>
-              <Marker coordinate={{ latitude: currentOrder.restaurantLat, longitude: currentOrder.restaurantLng }} title={currentOrder.restaurantname} pinColor="blue" >
-                <MaterialIcons name={'storefront'} size={40} color="#e74c3c" />
-              </Marker>
-              {polylineCoordinates.length > 0 && (
-                <Polyline
-                  coordinates={polylineCoordinates}
-                  strokeColor="#2c3e50"
-                  strokeWidth={5}
-                  lineCap="round"
-                />
-              )}
-            </>
-          )}
+      {userLocation && <MapView
+        style={styles.map}
+        initialRegion={{
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        }}
+        showsUserLocation={true}
+      >
+        {currentOrder && (
+          <>
+            <Marker coordinate={{ latitude: currentOrder.restaurantLat, longitude: currentOrder.restaurantLng }} title={currentOrder.restaurantname} pinColor="blue" >
+              <MaterialIcons name={'storefront'} size={40} color="#e74c3c" />
+            </Marker>
+            {polylineCoordinates.length > 0 && (
+              <Polyline
+                coordinates={polylineCoordinates}
+                strokeColor="#0891b2"
+                strokeWidth={5}
+                lineCap="round"
+              />
+            )}
+          </>
+        )}
 
-        </MapView>
-      )}
+      </MapView>}
     </View>
   );
 };

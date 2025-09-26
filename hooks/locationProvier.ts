@@ -7,7 +7,7 @@ import { ref, update } from "firebase/database";
 import { useEffect } from "react";
 import { useDispatch } from 'react-redux';
 import { showToast } from './common';
-export const LoctionProvier = ({ children }: any) => {
+export const LocationProvier = ({ children }: any) => {
     const { userId } = useAppSelector(state => state.System);
     const userRef = ref(db, `${driverNode}/${userId}`);
     const dispatch = useDispatch();
@@ -22,12 +22,13 @@ export const LoctionProvier = ({ children }: any) => {
                 const subscriber = await Location.watchPositionAsync(
                     {
                         accuracy: Location.Accuracy.BestForNavigation,
+                        timeInterval: 5000, // Update every 5 second
                         distanceInterval: 5, // Update every 5 meters
                     },
                     (newLocation) => {
                         const { latitude, longitude } = newLocation.coords;
-                        updateLocation(latitude, longitude);
                         dispatch(updateDriverLocation({ driverLat: latitude, driverLng: longitude }));
+                        updateLocation(latitude, longitude);
                     }
                 );
 
@@ -45,13 +46,9 @@ export const LoctionProvier = ({ children }: any) => {
         update(userRef, {
             lat: lat.toFixed(6),
             lng: long.toFixed(6)
-        })
-            .then(() => {
-                //  console.log('position updated');
-            })
-            .catch((error) => {
-                console.log("position update failed:");
-            });
+        }).catch((error) => {
+            console.log("position update failed:");
+        });
     };
     return children;
 }

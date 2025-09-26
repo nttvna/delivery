@@ -53,7 +53,8 @@ export interface Item {
 }
 export interface SystemState {
     userId: string;
-    driverLat: number;
-    driverLng: number;
-    currentOrder: NewOrderModel | null
+    driverLat: number|null;
+    driverLng: number|null;
+    currentOrder: NewOrderModel | null,
+    workstatus:boolean;
 }
