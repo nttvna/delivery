@@ -64,7 +64,7 @@ const Login = () => {
       const uid = user.uid;
       await SecureStore.setItemAsync('userEmail', email);
       await SecureStore.setItemAsync('userPassword', password);
-      dispatch(login({ userId: user.uid, token: 'abc12345' }));
+      dispatch(login({ userId: uid }));
       router.replace('/(tabs)');
       // You can now navigate to another screen or update your app state
     } catch (error) {

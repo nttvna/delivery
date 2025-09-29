@@ -25,9 +25,6 @@ const MapScreen = () => {
   const [error, setError] = useState<string>('');
   const dispatch = useDispatch();
   useEffect(() => {
-    console.log('driverLat');
-    console.log(driverLat);
-    console.log(driverLng);
     if (driverLat && driverLng) {
       setUserLocation({ latitude: driverLat, longitude: driverLng });
     }
@@ -71,7 +68,6 @@ const MapScreen = () => {
     try {
       const response = await fetch(url);
       const data = await response.json();
-      console.log(data);
       if (data.routes.length > 0) {
         // Decode the polyline string from the API response
         const points = polyline.decode(data.routes[0].overview_polyline.points);
@@ -84,7 +80,6 @@ const MapScreen = () => {
         setError('No routes found.');
       }
     } catch (err) {
-      console.error('Error fetching directions:', err);
       setError('Failed to fetch route. Please check your network or API key.');
     };
   };
@@ -144,10 +139,13 @@ const MapScreen = () => {
         }}
         showsUserLocation={true}
       >
+        <Marker coordinate={{ latitude: userLocation.latitude, longitude: userLocation.longitude }} title={'You are here'} pinColor="blue" >
+          <MaterialIcons name={'directions-car-filled'} size={40} color="#e9220cff" />
+        </Marker>
         {currentOrder && (
           <>
             <Marker coordinate={{ latitude: currentOrder.restaurantLat, longitude: currentOrder.restaurantLng }} title={currentOrder.restaurantname} pinColor="blue" >
-              <MaterialIcons name={'storefront'} size={40} color="#e74c3c" />
+              <MaterialIcons name={'storefront'} size={40} color="#e9220cff" />
             </Marker>
             {polylineCoordinates.length > 0 && (
               <Polyline

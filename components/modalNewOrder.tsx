@@ -15,51 +15,14 @@ const ModalNewOrder = () => {
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [newOrder, setNewOrder] = useState<NewOrderModel | null>(null);
     const { userId, driverLat, driverLng } = useAppSelector(state => state.System);
-    const [distance, setDistance] = useState<string>('');
-    const [duration, setDuration] = useState<string>('');
     const dispatch = useDispatch();
     const player = useAudioPlayer(audioSource);
     const playSound = () => {
         console.log('Playing Sound...');
         try {
             player.play();
-            console.log('Played Sound...');
         } catch (error) {
             console.error('Error playing sound:', error);
-        }
-    };
-    const getDirections = async (restaurantLat: number, restaurantLng: number) => {
-        const origin = `${driverLat},${driverLng}`;
-        const destinationLatLng = `${restaurantLat},${restaurantLng}`;
-        // Construct the API URL using the provided variables
-        const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destinationLatLng}&key=${GOOGLE_MAPS_API_KEY}&units=imperial`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            console.log('url');
-            console.log(url);
-            const data = await response.json();
-            // The error occurs on the next line because data.routes is an empty array
-            // console.log(data.routes[0].legs[0]); 
-
-            // Add a check to ensure the routes and legs arrays exist and have elements
-            if (data.routes && data.routes.length > 0 && data.routes[0].legs && data.routes[0].legs.length > 0) {
-                const firstLeg = data.routes[0].legs[0];
-                setDistance(firstLeg.distance.text);
-                setDuration(firstLeg.duration.text);
-                console.log('Distance:', firstLeg.distance.text);
-                console.log('Duration:', firstLeg.duration.text);
-            } else {
-                console.log('No valid route data found in the API response.');
-                // Handle the case where no route is found, for example, by setting a default message
-                setDistance('N/A');
-                setDuration('N/A');
-            }
-        } catch (err: any) {
-            console.error('API call failed:', err);
-            console.log(`Failed to fetch directions: ${err.message}`);
         }
     };
     useEffect(() => {
@@ -84,11 +47,12 @@ const ModalNewOrder = () => {
                 const orderObject = {
                     ...orderData,
                     Id: nodeId,
-                    ordertextinfoforappObject: orderInfoForApp
+                    ordertextinfoforappObject: orderInfoForApp,
+                    distance: '',
+                    duration: ''
                 };
-                getDirections(restaurantLat, restaurantLng);
+                console.log('driverlat,long:', driverLat, driverLng);
                 setNewOrder(orderObject);
-
             }
         });
         // Clean up the listener when the component unmounts
@@ -97,12 +61,53 @@ const ModalNewOrder = () => {
         };
     }, [userId]);
     useEffect(() => {
-        if (distance && duration) {
+        if (newOrder && newOrder.restaurantLat && newOrder.restaurantLng) {
+            getDirections(newOrder.restaurantLat, newOrder.restaurantLng);
+        }
+    }, [newOrder?.Id]);
+    useEffect(() => {
+        if (newOrder && newOrder.distance && newOrder.duration) {
             dispatch(addOrder({ order: newOrder }));
             playSound();
             setModalVisible(true);
         }
-    }, [distance, duration]);
+    }, [newOrder?.distance, newOrder?.duration]);
+    const getDirections = async (restaurantLat: number, restaurantLng: number) => {
+        const origin = `${driverLat},${driverLng}`;
+        const destinationLatLng = `${restaurantLat},${restaurantLng}`;
+        // Construct the API URL using the provided variables
+        const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destinationLatLng}&key=${GOOGLE_MAPS_API_KEY}&units=imperial`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+            if (data.routes && data.routes.length > 0 && data.routes[0].legs && data.routes[0].legs.length > 0) {
+                const firstLeg = data.routes[0].legs[0];
+                setNewOrder(prevState => {
+                    if (prevState === null) return null;
+                    return {
+                        ...prevState,
+                        distance: firstLeg.distance.text ?? '',
+                        duration: firstLeg.duration.text ?? ''
+                    };
+                });
+            } else {
+                setNewOrder(prevState => {
+                    if (prevState === null) return null;
+                    return {
+                        ...prevState,
+                        distance: 'N/A',
+                        duration: 'N/A'
+                    };
+                });
+            }
+
+        } catch (err: any) {
+            console.error('API call failed:', err);
+        }
+    };
     const acceptOrder = () => {
         if (newOrder) {
             const orderRef = ref(db, `${orderNode}/${newOrder.Id}`);
@@ -111,8 +116,6 @@ const ModalNewOrder = () => {
                 assignforuserid: userId
             })
                 .then(() => {
-                    setDistance('');
-                    setDuration('');
                     setModalVisible(false);
                 })
                 .catch((error) => {
@@ -123,8 +126,6 @@ const ModalNewOrder = () => {
     const cancelOrder = () => {
         if (newOrder) {
             dispatch(clearOrder(undefined));
-            setDistance('');
-            setDuration('');
             setModalVisible(false);
         }
     };
@@ -143,12 +144,12 @@ const ModalNewOrder = () => {
                         <View style={styles.columnleft}>
                             <Text style={{
                                 color: '#333',
-                            }}>{distance}{' mi'}</Text>
+                            }}>{newOrder?.distance}{' mi'}</Text>
                         </View>
                         <View style={styles.columnright}>
                             <Text style={{
                                 color: '#333',
-                            }}>{duration}</Text>
+                            }}>{newOrder?.duration}</Text>
 
                         </View>
                     </View>

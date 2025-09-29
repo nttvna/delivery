@@ -1,3 +1,4 @@
+import ModalNewOrder from '@/components/modalNewOrder';
 import { LocationProvier } from '@/hooks/locationProvier';
 import { store } from '@/redux/store';
 import { Stack } from 'expo-router';
@@ -15,6 +16,7 @@ export default function RootLayout() {
           </Stack>
         </SafeAreaProvider>
         <Toast />
+        <ModalNewOrder />
       </LocationProvier>
     </Provider>
   );

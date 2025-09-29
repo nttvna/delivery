@@ -35,7 +35,9 @@ export interface NewOrderModel {
     restaurantphone: string;
     restaurantshortaddress: string;
     tipForDeliver: number;
-    ordertextinfoforappObject:OrderDetail| null;
+    ordertextinfoforappObject: OrderDetail | null;
+    distance: string;
+    duration: string;
 }
 export interface OrderDetail {
     Items: Item[];
@@ -53,8 +55,8 @@ export interface Item {
 }
 export interface SystemState {
     userId: string;
-    driverLat: number|null;
-    driverLng: number|null;
+    driverLat: number | null;
+    driverLng: number | null;
     currentOrder: NewOrderModel | null,
-    workstatus:boolean;
+    workstatus: boolean;
 }

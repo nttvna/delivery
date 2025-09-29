@@ -1,5 +1,5 @@
 import { SystemState } from '@/models/reduxmodel';
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 // Define the initial state for the slice
 const initialState: SystemState = {
@@ -30,9 +30,18 @@ const systemSlice = createSlice({
         updateWorkStatus: (state, action) => {
             state.workstatus = action.payload.workstatus;
         },
-        updateDriverLocation: (state, action) => {
-            state.driverLat = action.payload.driverLat;
-            state.driverLng = action.payload.driverLng;
+        updateDriverLocation: (state, action: PayloadAction<{
+            driverLat: number;
+            driverLng: number;
+        }>) => {
+            const { driverLat, driverLng } = action.payload;
+            try {
+                state.driverLat = driverLat;
+                state.driverLng = driverLng;
+            } catch (error) {
+                console.error('updateDriverLocation:', error);
+            }
+
         },
     },
 });
