@@ -1,4 +1,4 @@
-import { driverNode, DriverNodeChild, GOOGLE_MAPS_API_KEY, mainColor } from '@/constants/systemconstant';
+import { driverNode, DriverNodeChild, googleRouteUrl, mainColor } from '@/constants/systemconstant';
 import { showToast } from '@/hooks/common';
 import { MapLocation } from '@/models/apimodel';
 import { useAppSelector } from '@/redux/reduxhooks';
@@ -12,14 +12,10 @@ import { ActivityIndicator, StyleSheet, Switch, Text, View } from 'react-native'
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
-interface LocationObject {
-  latitude: number;
-  longitude: number;
-  // Add any other properties your location object might have (e.g., 'timestamp', 'altitude')
-}
+
 const MapScreen = () => {
   const { userId, currentOrder, driverLat, driverLng, workstatus } = useAppSelector(state => state.System);
-  const [userLocation, setUserLocation] = useState<LocationObject | null>(null);
+  const [userLocation, setUserLocation] = useState<MapLocation | null>(null);
   const insets = useSafeAreaInsets(); // Get the safe area insets
   const [polylineCoordinates, setPolylineCoordinates] = useState<MapLocation[]>([]);
   const [error, setError] = useState<string>('');
@@ -32,7 +28,7 @@ const MapScreen = () => {
       fetchDirections();
     }
 
-  }, [currentOrder, driverLat, driverLng]);
+  }, [currentOrder?.Id, driverLat, driverLng]);
   useEffect(() => {
     const fetchWorkStatus = async () => {
       try {
@@ -63,10 +59,14 @@ const MapScreen = () => {
     const destinationLatLng = `${currentOrder.restaurantLat},${currentOrder.restaurantLng}`;
 
     // Construct the API URL for directions
-    const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destinationLatLng}&key=${GOOGLE_MAPS_API_KEY}`;
+    const url = googleRouteUrl(origin, destinationLatLng);
 
     try {
       const response = await fetch(url);
+      if (!response.ok) {
+        setError('Failed to fetch route. Please check your network or API key.');
+        return;
+      }
       const data = await response.json();
       if (data.routes.length > 0) {
         // Decode the polyline string from the API response

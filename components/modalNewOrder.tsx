@@ -1,10 +1,11 @@
-import { GOOGLE_MAPS_API_KEY, orderNode, OrderNodeChild, OrderStatus } from '@/constants/systemconstant';
+import { googleRouteUrl, orderNode, OrderNodeChild, OrderStatus } from '@/constants/systemconstant';
 import { showToast } from '@/hooks/common';
 import { NewOrderModel, OrderDetail } from '@/models/reduxmodel';
 import { useAppSelector } from '@/redux/reduxhooks';
 import { addOrder, clearOrder } from '@/redux/systemSlice';
 import { db } from '@/scripts/firebaseConfig';
 import { useAudioPlayer } from 'expo-audio'; // Corrected import
+import { router } from 'expo-router';
 import { equalTo, off, onChildAdded, orderByChild, query, ref, update } from 'firebase/database';
 import { useEffect, useState } from 'react';
 import { Modal, StyleSheet, Text, View } from 'react-native';
@@ -76,7 +77,7 @@ const ModalNewOrder = () => {
         const origin = `${driverLat},${driverLng}`;
         const destinationLatLng = `${restaurantLat},${restaurantLng}`;
         // Construct the API URL using the provided variables
-        const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destinationLatLng}&key=${GOOGLE_MAPS_API_KEY}&units=imperial`;
+        const url = googleRouteUrl(origin, destinationLatLng);;
         try {
             const response = await fetch(url);
             if (!response.ok) {
@@ -117,6 +118,7 @@ const ModalNewOrder = () => {
             })
                 .then(() => {
                     setModalVisible(false);
+                    router.replace('/onway');
                 })
                 .catch((error) => {
                     showToast("update failed");

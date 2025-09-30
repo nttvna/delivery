@@ -27,7 +27,6 @@ export const LocationProvier = ({ children }: any) => {
                     },
                     (newLocation) => {
                         const { latitude, longitude } = newLocation.coords;
-                        console.log('driver update location', newLocation.coords);
                         dispatch(updateDriverLocation({ driverLat: latitude, driverLng: longitude }));
                         updateLocation(latitude, longitude);
                     }
