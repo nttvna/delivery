@@ -1,11 +1,10 @@
-import { driverNode, DriverNodeChild, googleRouteUrl, LATITUDE_DELTA, mainColor } from '@/constants/systemconstant';
+import { driverNode, DriverNodeChild, LATITUDE_DELTA, mainColor } from '@/constants/systemconstant';
 import { showToast } from '@/hooks/common';
 import { MapLocation } from '@/models/apimodel';
 import { useAppSelector } from '@/redux/reduxhooks';
 import { updateWorkStatus } from '@/redux/systemSlice';
 import { db } from '@/scripts/firebaseConfig';
 import { MaterialIcons } from '@expo/vector-icons';
-import polyline from '@mapbox/polyline';
 import { get, ref, update } from "firebase/database";
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, StyleSheet, Switch, Text, View } from 'react-native';
@@ -14,10 +13,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 
 const MapScreen = () => {
-  const { userId, currentOrder, driverLat, driverLng, workstatus } = useAppSelector(state => state.System);
+  const { userId, currentOrder, driverLat, driverLng, workstatus, polylineCoordinates } = useAppSelector(state => state.System);
   const [userLocation, setUserLocation] = useState<MapLocation | null>(null);
   const insets = useSafeAreaInsets(); // Get the safe area insets
-  const [polylineCoordinates, setPolylineCoordinates] = useState<MapLocation[]>([]);
+  const [coordinates, setCoordinates] = useState<MapLocation[]>([]);
   const [error, setError] = useState<string>('');
   const { width, height } = Dimensions.get('window');
   const ASPECT_RATIO = width / height;
@@ -27,11 +26,14 @@ const MapScreen = () => {
     if (driverLat && driverLng) {
       setUserLocation({ latitude: driverLat, longitude: driverLng });
     }
-    if (currentOrder && driverLat && driverLng) {
-      fetchDirections();
-    }
 
   }, [currentOrder?.Id, driverLat, driverLng]);
+  useEffect(() => {
+    if (polylineCoordinates) {
+      setCoordinates(polylineCoordinates);
+    }
+
+  }, [polylineCoordinates]);
   useEffect(() => {
     const fetchWorkStatus = async () => {
       try {
@@ -52,40 +54,6 @@ const MapScreen = () => {
 
     fetchWorkStatus();
   }, [userId, db]); // Reruns the effect if orderId or db changes
-  const fetchDirections = async () => {
-    if (!userLocation || !currentOrder) {
-      setError('Missing location data');
-      return;
-    }
-    setError('');
-    const origin = `${userLocation.latitude},${userLocation.longitude}`;
-    const destinationLatLng = `${currentOrder.restaurantLat},${currentOrder.restaurantLng}`;
-
-    // Construct the API URL for directions
-    const url = googleRouteUrl(origin, destinationLatLng);
-
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        setError('Failed to fetch route. Please check your network or API key.');
-        return;
-      }
-      const data = await response.json();
-      if (data.routes.length > 0) {
-        // Decode the polyline string from the API response
-        const points = polyline.decode(data.routes[0].overview_polyline.points);
-        const routeCoordinates = points.map(point => ({
-          latitude: point[0],
-          longitude: point[1],
-        }));
-        setPolylineCoordinates(routeCoordinates);
-      } else {
-        setError('No routes found.');
-      }
-    } catch (err) {
-      setError('Failed to fetch route. Please check your network or API key.');
-    };
-  };
   const toggleSwitch = () => {
     if (workstatus !== null) {
       const driverRef = ref(db, `${driverNode}/${userId}`);
@@ -150,9 +118,9 @@ const MapScreen = () => {
             <Marker coordinate={{ latitude: currentOrder.restaurantLat, longitude: currentOrder.restaurantLng }} title={currentOrder.restaurantname} pinColor="blue" >
               <MaterialIcons name={'storefront'} size={40} color="#e9220cff" />
             </Marker>
-            {polylineCoordinates.length > 0 && (
+            {coordinates.length > 0 && (
               <Polyline
-                coordinates={polylineCoordinates}
+                coordinates={coordinates}
                 strokeColor="#0891b2"
                 strokeWidth={5}
                 lineCap="round"

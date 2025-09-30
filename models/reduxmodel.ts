@@ -1,3 +1,5 @@
+import { MapLocation } from "./apimodel";
+
 export interface NewOrderModel {
     Id: string;
     assignMode: number;
@@ -59,4 +61,5 @@ export interface SystemState {
     driverLng: number | null;
     currentOrder: NewOrderModel | null,
     workstatus: boolean;
+    polylineCoordinates: MapLocation[];
 }

@@ -4,6 +4,7 @@ import { NewOrderModel, OrderDetail } from '@/models/reduxmodel';
 import { useAppSelector } from '@/redux/reduxhooks';
 import { addOrder, clearOrder } from '@/redux/systemSlice';
 import { db } from '@/scripts/firebaseConfig';
+import polyline from '@mapbox/polyline';
 import { useAudioPlayer } from 'expo-audio'; // Corrected import
 import { router } from 'expo-router';
 import { equalTo, off, onChildAdded, orderByChild, query, ref, update } from 'firebase/database';
@@ -15,7 +16,7 @@ const audioSource = require('@/assets/audio/notification.mp3');
 const ModalNewOrder = () => {
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [newOrder, setNewOrder] = useState<NewOrderModel | null>(null);
-    const { userId, driverLat, driverLng } = useAppSelector(state => state.System);
+    const { userId, driverLat, driverLng, currentOrder } = useAppSelector(state => state.System);
     const dispatch = useDispatch();
     const player = useAudioPlayer(audioSource);
     const playSound = () => {
@@ -36,7 +37,7 @@ const ModalNewOrder = () => {
         const onNewOrder = onChildAdded(ordersRef, async (snapshot) => {
             const orderData = snapshot.val();
             if (orderData.assignforuserid = userId) {
-                const { restaurantLat, restaurantLng, ordertextinfoforapp } = orderData;
+                const { ordertextinfoforapp } = orderData;
                 let orderInfoForApp: OrderDetail | null = null;
 
                 try {
@@ -49,10 +50,9 @@ const ModalNewOrder = () => {
                     ...orderData,
                     Id: nodeId,
                     ordertextinfoforappObject: orderInfoForApp,
-                    distance: '',
+                    distance: 0,
                     duration: ''
                 };
-                console.log('driverlat,long:', driverLat, driverLng);
                 setNewOrder(orderObject);
             }
         });
@@ -67,12 +67,12 @@ const ModalNewOrder = () => {
         }
     }, [newOrder?.Id]);
     useEffect(() => {
-        if (newOrder && newOrder.distance && newOrder.duration) {
+        if (!currentOrder && newOrder && newOrder.distance && newOrder.duration) {
             dispatch(addOrder({ order: newOrder }));
             playSound();
             setModalVisible(true);
         }
-    }, [newOrder?.distance, newOrder?.duration]);
+    }, [currentOrder, newOrder?.distance, newOrder?.duration]);
     const getDirections = async (restaurantLat: number, restaurantLng: number) => {
         const origin = `${driverLat},${driverLng}`;
         const destinationLatLng = `${restaurantLat},${restaurantLng}`;
@@ -86,11 +86,18 @@ const ModalNewOrder = () => {
             const data = await response.json();
             if (data.routes && data.routes.length > 0 && data.routes[0].legs && data.routes[0].legs.length > 0) {
                 const firstLeg = data.routes[0].legs[0];
+                const distanceInMiles = parseFloat(firstLeg.distance.tex.replace(' mi', ''));
+                const points = polyline.decode(data.routes[0].overview_polyline.points);
+                const routeCoordinates = points.map(point => ({
+                    latitude: point[0],
+                    longitude: point[1],
+                }));
+                dispatch(updatePolyline({ polylineCoordinates: routeCoordinates }));
                 setNewOrder(prevState => {
                     if (prevState === null) return null;
                     return {
                         ...prevState,
-                        distance: parseFloat(firstLeg.distance.text.replace(' mi', '')),
+                        distance: distanceInMiles,
                         duration: firstLeg.duration.text ?? ''
                     };
                 });
@@ -135,10 +142,7 @@ const ModalNewOrder = () => {
         <Modal
             animationType="slide"
             transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => {
-                setModalVisible(!modalVisible);
-            }}
+            visible={false}
         >
             <View style={styles.centeredView}>
                 <View style={styles.modalView}>
@@ -302,3 +306,7 @@ const styles = StyleSheet.create({
         width: 80
     }
 });
+function updatePolyline(arg0: { polylineCoordinates: { latitude: number; longitude: number; }[]; }): any {
+    throw new Error('Function not implemented.');
+}
+

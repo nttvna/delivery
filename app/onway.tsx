@@ -60,10 +60,11 @@ export default function OnWayScreen() {
             if (data.routes && data.routes.length > 0) {
                 if (data.routes[0].legs && data.routes[0].legs.length > 0) {
                     const firstLeg = data.routes[0].legs[0];
+                    const distanceInMiles = parseFloat(firstLeg.distance.tex.replace(' mi', ''));
                     dispatch(addOrder({
                         order: {
                             ...currentOrder,
-                            distance: parseFloat(firstLeg.distance.text.replace(' mi', '')),
+                            distance: distanceInMiles,
                             duration: firstLeg.duration.text ?? ''
                         }
                     }));

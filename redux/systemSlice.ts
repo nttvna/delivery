@@ -7,7 +7,8 @@ const initialState: SystemState = {
     driverLat: null,
     driverLng: null,
     currentOrder: null,
-    workstatus: false
+    workstatus: false,
+    polylineCoordinates: []
 };
 
 // Create the slice
@@ -26,6 +27,9 @@ const systemSlice = createSlice({
         },
         clearOrder: (state, action) => {
             state.currentOrder = null;
+        },
+        updatePolyline: (state, action) => {
+            state.polylineCoordinates = action.payload.polylineCoordinates;
         },
         updateWorkStatus: (state, action) => {
             state.workstatus = action.payload.workstatus;
