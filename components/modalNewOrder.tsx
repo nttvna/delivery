@@ -90,7 +90,7 @@ const ModalNewOrder = () => {
                     if (prevState === null) return null;
                     return {
                         ...prevState,
-                        distance: firstLeg.distance.text ?? '',
+                        distance: parseFloat(firstLeg.distance.text.replace(' mi', '')),
                         duration: firstLeg.duration.text ?? ''
                     };
                 });
@@ -99,7 +99,7 @@ const ModalNewOrder = () => {
                     if (prevState === null) return null;
                     return {
                         ...prevState,
-                        distance: 'N/A',
+                        distance: 0,
                         duration: 'N/A'
                     };
                 });
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
-        width: '60%'
+        width: '80%'
     },
     modalText: {
         marginBottom: 15,

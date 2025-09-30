@@ -1,4 +1,4 @@
-import { driverNode, DriverNodeChild, googleRouteUrl, mainColor } from '@/constants/systemconstant';
+import { driverNode, DriverNodeChild, googleRouteUrl, LATITUDE_DELTA, mainColor } from '@/constants/systemconstant';
 import { showToast } from '@/hooks/common';
 import { MapLocation } from '@/models/apimodel';
 import { useAppSelector } from '@/redux/reduxhooks';
@@ -8,7 +8,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import polyline from '@mapbox/polyline';
 import { get, ref, update } from "firebase/database";
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, Dimensions, StyleSheet, Switch, Text, View } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
@@ -19,6 +19,9 @@ const MapScreen = () => {
   const insets = useSafeAreaInsets(); // Get the safe area insets
   const [polylineCoordinates, setPolylineCoordinates] = useState<MapLocation[]>([]);
   const [error, setError] = useState<string>('');
+  const { width, height } = Dimensions.get('window');
+  const ASPECT_RATIO = width / height;
+  const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
   const dispatch = useDispatch();
   useEffect(() => {
     if (driverLat && driverLng) {
@@ -132,12 +135,12 @@ const MapScreen = () => {
       {userLocation && <MapView
         style={styles.map}
         initialRegion={{
-          latitude: userLocation.latitude,
-          longitude: userLocation.longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+          latitude: currentOrder ? ((userLocation.latitude + currentOrder.restaurantLat) / 2) : userLocation.latitude,
+          longitude: currentOrder ? ((userLocation.longitude + currentOrder.restaurantLng) / 2) : userLocation.longitude,
+          latitudeDelta: LATITUDE_DELTA,
+          longitudeDelta: LONGITUDE_DELTA,
         }}
-        showsUserLocation={true}
+        showsUserLocation={false}
       >
         <Marker coordinate={{ latitude: userLocation.latitude, longitude: userLocation.longitude }} title={'You are here'} pinColor="blue" >
           <MaterialIcons name={'directions-car-filled'} size={40} color="#e9220cff" />

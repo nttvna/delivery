@@ -36,7 +36,7 @@ export interface NewOrderModel {
     restaurantshortaddress: string;
     tipForDeliver: number;
     ordertextinfoforappObject: OrderDetail | null;
-    distance: string;
+    distance: number;
     duration: string;
 }
 export interface OrderDetail {

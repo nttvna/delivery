@@ -1,5 +1,5 @@
 export const baseUrl: string = "https://d-api.ringameal.com";
-export const googleRouteUrl = (origin: string, destinationLatLng: string): string => `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destinationLatLng}&key=${GOOGLE_MAPS_API_KEY}&units=imperial`;
+export const googleRouteUrl = (origin: string, destinationLatLng: string): string => `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destinationLatLng}&key=${GOOGLE_MAPS_API_KEY}&units=imperial&language=en`;
 export const AccessToken: string = "96dLWEp3Sdh4hwjX20CcirshXvI39mTSZ0o2llXNnDQ2fwqMsRu27K43";
 export const mainColor: string = '#10b981'
 export const enum ToastType {
@@ -7,9 +7,12 @@ export const enum ToastType {
     _success = 'success',
     _info = 'info'
 }
+export const LATITUDE_DELTA: number = 0.0922;
+export const LONGITUDE_DEFAULT = 0.0421;
 export const GOOGLE_MAPS_API_KEY = 'AIzaSyBn3QNw0j5aVViWDmqzWDahtNhVFiIAJJg';
 export const driverNode: string = 'delivers';
 export const orderNode: string = 'orders';
+export const OnFrontDistance: number = 0.0062;
 export const enum DriverNodeChild {
     _workstatus = 'workstatus'
 }
@@ -45,6 +48,7 @@ export const enum OrderStatus {
     _CANCEL = 'CANCEL',
     _REFUSE = 'REFUSE',
     _ACCEPT = 'ACCEPT',
+    _ONFRONT = 'ONFRONT',
 }
 export const defaultRegion = {
     latitude: 37.78825,
