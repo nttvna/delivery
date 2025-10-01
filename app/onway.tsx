@@ -18,6 +18,7 @@ import { useDispatch } from 'react-redux';
 export default function OnWayScreen() {
     const { currentOrder, driverLat, driverLng } = useAppSelector(state => state.System);
     const [userLocation, setUserLocation] = useState<MapLocation | null>(null);
+    const [isFetchingLocation, setIsFetchingLocation] = useState<boolean>(false);
     const insets = useSafeAreaInsets(); // Get the safe area insets
     const [polylineCoordinates, setPolylineCoordinates] = useState<MapLocation[]>([]);
     const [error, setError] = useState<string>('');
@@ -29,38 +30,41 @@ export default function OnWayScreen() {
         if (driverLat && driverLng) {
             setUserLocation({ latitude: driverLat, longitude: driverLng });
         }
-    }, [currentOrder?.Id, driverLat, driverLng]);
+    }, [driverLat, driverLng]);
     useEffect(() => {
-        if (userLocation) {
+        if (userLocation && !isFetchingLocation) {
             fetchDirections();
         }
-    }, [userLocation]);
+    }, [userLocation?.latitude, userLocation?.longitude]);
     useEffect(() => {
         setOnFront();
     }, [currentOrder?.distance]);
     const fetchDirections = async () => {
         if (!userLocation || !currentOrder) {
-            setError('Missing location data');
             return;
         }
+        setIsFetchingLocation(true);
         setError('');
         const origin = `${userLocation.latitude},${userLocation.longitude}`;
         const destinationLatLng = `${currentOrder.restaurantLat},${currentOrder.restaurantLng}`;
 
         // Construct the API URL for directions
         const url = googleRouteUrl(origin, destinationLatLng);
-
+        console.log('---------------------------------------------------');
+        console.log('url');
+        console.log(url);
         try {
             const response = await fetch(url);
             if (!response.ok) {
                 setError('Failed to fetch route. Please check your network or API key.');
+                setIsFetchingLocation(false);
                 return;
             }
             const data = await response.json();
-            if (data.routes && data.routes.length > 0) {
+            if (data && data.routes && data.routes.length > 0) {
                 if (data.routes[0].legs && data.routes[0].legs.length > 0) {
                     const firstLeg = data.routes[0].legs[0];
-                    const distanceInMiles = parseFloat(firstLeg.distance.tex.replace(' mi', ''));
+                    const distanceInMiles = parseFloat(firstLeg.distance.text.replace(' mi', ''));
                     dispatch(addOrder({
                         order: {
                             ...currentOrder,
@@ -87,7 +91,10 @@ export default function OnWayScreen() {
                 setError('No routes found.');
             }
         } catch (err) {
+            console.log(err);
             setError('Failed to fetch route. Please check your network or API key.');
+        } finally {
+            setIsFetchingLocation(false);
         };
     };
     const makeCall = () => {

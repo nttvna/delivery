@@ -29,7 +29,7 @@ const MapScreen = () => {
 
   }, [currentOrder?.Id, driverLat, driverLng]);
   useEffect(() => {
-    if (polylineCoordinates) {
+    if (polylineCoordinates && polylineCoordinates.length > 0) {
       setCoordinates(polylineCoordinates);
     }
 
@@ -108,7 +108,7 @@ const MapScreen = () => {
           latitudeDelta: LATITUDE_DELTA,
           longitudeDelta: LONGITUDE_DELTA,
         }}
-        showsUserLocation={false}
+        showsUserLocation={true}
       >
         <Marker coordinate={{ latitude: userLocation.latitude, longitude: userLocation.longitude }} title={'You are here'} pinColor="blue" >
           <MaterialIcons name={'directions-car-filled'} size={40} color="#e9220cff" />
@@ -121,7 +121,7 @@ const MapScreen = () => {
             {coordinates.length > 0 && (
               <Polyline
                 coordinates={coordinates}
-                strokeColor="#0891b2"
+                strokeColor="#08b25dff"
                 strokeWidth={5}
                 lineCap="round"
               />

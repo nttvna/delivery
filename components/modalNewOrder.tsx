@@ -2,7 +2,7 @@ import { googleRouteUrl, orderNode, OrderNodeChild, OrderStatus } from '@/consta
 import { showToast } from '@/hooks/common';
 import { NewOrderModel, OrderDetail } from '@/models/reduxmodel';
 import { useAppSelector } from '@/redux/reduxhooks';
-import { addOrder, clearOrder } from '@/redux/systemSlice';
+import { addOrder, clearOrder, updatePolyline } from '@/redux/systemSlice';
 import { db } from '@/scripts/firebaseConfig';
 import polyline from '@mapbox/polyline';
 import { useAudioPlayer } from 'expo-audio'; // Corrected import
@@ -77,16 +77,16 @@ const ModalNewOrder = () => {
         const origin = `${driverLat},${driverLng}`;
         const destinationLatLng = `${restaurantLat},${restaurantLng}`;
         // Construct the API URL using the provided variables
-        const url = googleRouteUrl(origin, destinationLatLng);;
+        const url = googleRouteUrl(origin, destinationLatLng);
         try {
             const response = await fetch(url);
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                return;
             }
             const data = await response.json();
             if (data.routes && data.routes.length > 0 && data.routes[0].legs && data.routes[0].legs.length > 0) {
                 const firstLeg = data.routes[0].legs[0];
-                const distanceInMiles = parseFloat(firstLeg.distance.tex.replace(' mi', ''));
+                const distanceInMiles = parseFloat(firstLeg.distance.text.replace(' mi', ''));
                 const points = polyline.decode(data.routes[0].overview_polyline.points);
                 const routeCoordinates = points.map(point => ({
                     latitude: point[0],
@@ -101,6 +101,7 @@ const ModalNewOrder = () => {
                         duration: firstLeg.duration.text ?? ''
                     };
                 });
+
             } else {
                 setNewOrder(prevState => {
                     if (prevState === null) return null;
@@ -142,7 +143,7 @@ const ModalNewOrder = () => {
         <Modal
             animationType="slide"
             transparent={true}
-            visible={false}
+            visible={modalVisible}
         >
             <View style={styles.centeredView}>
                 <View style={styles.modalView}>
@@ -306,7 +307,4 @@ const styles = StyleSheet.create({
         width: 80
     }
 });
-function updatePolyline(arg0: { polylineCoordinates: { latitude: number; longitude: number; }[]; }): any {
-    throw new Error('Function not implemented.');
-}
 

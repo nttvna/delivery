@@ -22,8 +22,8 @@ export const LocationProvier = ({ children }: any) => {
                 const subscriber = await Location.watchPositionAsync(
                     {
                         accuracy: Location.Accuracy.BestForNavigation,
-                        timeInterval: 5000, // Update every 5 second
-                        distanceInterval: 5, // Update every 5 meters
+                        timeInterval: 10000, // Update every 5 second
+                        distanceInterval: 10, // Update every 5 meters
                     },
                     (newLocation) => {
                         const { latitude, longitude } = newLocation.coords;
