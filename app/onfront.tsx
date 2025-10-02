@@ -94,7 +94,7 @@ export default function OnFrontScreen() {
                     </View>
                     <IconButton
                         text=''
-                        icon='list-alt'
+                        icon='keyboard-double-arrow-right'
                         onPress={makeCall}
                         bgColor={'transparent'}
                         size='sm'
@@ -108,12 +108,12 @@ export default function OnFrontScreen() {
                         justifyContent: 'center',
                         alignItems: 'center',
                         borderRadius: 4,
-                        width: '80%',
+                        width: '70%',
                         backgroundColor: '#c4c7c5',
                         paddingVertical: 18,
                         marginBottom: 12
                     }}>
-                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>{'CONFIRM ORDER'}</Text>
+                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>{'START DELIVERY'}</Text>
                 </TouchableOpacity>
             </View>
         </View >

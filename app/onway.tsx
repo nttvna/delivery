@@ -37,7 +37,9 @@ export default function OnWayScreen() {
         }
     }, [userLocation?.latitude, userLocation?.longitude]);
     useEffect(() => {
-        setOnFront();
+        if (currentOrder?.distance && currentOrder?.distance <= OnFrontDistance) {
+            setOnFront();
+        }
     }, [currentOrder?.distance]);
     const fetchDirections = async () => {
         if (!userLocation || !currentOrder) {
@@ -50,9 +52,6 @@ export default function OnWayScreen() {
 
         // Construct the API URL for directions
         const url = googleRouteUrl(origin, destinationLatLng);
-        console.log('---------------------------------------------------');
-        console.log('url');
-        console.log(url);
         try {
             const response = await fetch(url);
             if (!response.ok) {
@@ -105,7 +104,7 @@ export default function OnWayScreen() {
         Linking.openURL(url).catch(err => console.error('An error occurred', err));
     };
     const setOnFront = () => {
-        if (currentOrder && currentOrder.distance <= OnFrontDistance) {
+        if (currentOrder) {
             const orderRef = ref(db, `${orderNode}/${currentOrder.Id}`);
             update(orderRef, {
                 orderstatus: OrderStatus._ONFRONT
@@ -176,13 +175,13 @@ export default function OnWayScreen() {
             </MapView>}
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 15, paddingVertical: 12, marginBottom: 16 }}>
                 <View style={{ flexGrow: 1, gap: 8 }}>
-                    <Text style={{ color: '#333', fontWeight: 'bold' }}>{'DELIVERY'}</Text>
-                    <Text style={{ color: '#333', fontSize: 16 }}>{currentOrder?.restaurantname}</Text>
+                    <Text style={{ color: '#333', fontWeight: 'bold' }}>{currentOrder?.restaurantname}</Text>
+                    <Text style={{ color: '#333', fontSize: 16 }}>{currentOrder?.restaurantphone}</Text>
                 </View>
                 <IconButton
                     text=''
                     icon='phone'
-                    onPress={makeCall}
+                    onPress={setOnFront}
                     bgColor={'transparent'}
                     size='md'
                     width={80}
