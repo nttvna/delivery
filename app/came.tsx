@@ -9,24 +9,24 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-export default function OnFrontScreen() {
+export default function CameScreen() {
     const { currentOrder } = useAppSelector(state => state.System);
     const [userLocation, setUserLocation] = useState<MapLocation | null>(null);
     const insets = useSafeAreaInsets(); // Get the safe area insets
     useEffect(() => {
         if (currentOrder) {
-            setUserLocation({ latitude: currentOrder?.restaurantLat, longitude: currentOrder?.restaurantLng });
+            setUserLocation({ latitude: currentOrder?.deliveryLat, longitude: currentOrder?.deliveryLng });
         }
     }, [currentOrder?.Id]);
     const makeCall = () => {
         // Ensure the phone number is properly formatted (e.g., no spaces or dashes)
-        const url = `tel:${currentOrder?.restaurantphone}`;
+        const url = `tel:${currentOrder?.customerphone}`;
 
         // Open the phone app with the number pre-filled
         Linking.openURL(url).catch(err => console.error('An error occurred', err));
     };
     const doConfirm = () => {
-        router.replace('/pickup');
+        router.replace('/finish');
     };
     return (
         <View style={styles.container}>
@@ -43,16 +43,10 @@ export default function OnFrontScreen() {
                     color: 'white',
                     fontSize: 20,
                     fontWeight: 'bold',
-                }}>ON FRONT</Text>
+                }}>FINISH DELIVERY</Text>
 
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 32, paddingHorizontal: 15, paddingVertical: 10 }}>
-                <View style={{ flexGrow: 1, gap: 8 }}>
-                    <Text style={{ color: '#333', fontWeight: 'bold' }}>{currentOrder?.restaurantname}</Text>
-                    <Text style={{ color: '#333', fontWeight: 'bold' }}>{currentOrder?.restaurantshortaddress}</Text>
-                </View>
-                <MaterialIcons name={'alt-route'} size={40} color="#333" />
-            </View>
+
             {userLocation && <MapView
                 style={styles.map}
                 initialRegion={{
@@ -64,23 +58,17 @@ export default function OnFrontScreen() {
             >
                 <Marker coordinate={{ latitude: userLocation?.latitude, longitude: userLocation?.longitude }} title={currentOrder?.restaurantname} pinColor="blue" >
                     <View style={styles.markerContainer}>
-                        <Text style={{ color: '#333', backgroundColor: 'yellow' }}>{'ON FRONT'}</Text>
+                        <Text style={{ color: '#333', backgroundColor: 'yellow' }}>{'FINISH'}</Text>
                         <MaterialIcons name={'storefront'} size={40} color="#e9220cff" />
                     </View>
                 </Marker>
             </MapView>}
             <View style={{ gap: 16, paddingHorizontal: 15, paddingVertical: 12, marginBottom: 16, alignItems: 'center' }}>
-                <View style={{ gap: 8, flexDirection: 'row' }}>
-                    {currentOrder?.instructionsRes ? <View style={{ flexGrow: 1, gap: 8 }}>
-                        <Text style={{ color: '#333', fontWeight: 'bold' }}>{'Pick up instruction'}</Text>
-                        <Text style={{ color: '#333' }}>{currentOrder?.instructionsRes}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 32, paddingHorizontal: 15, paddingVertical: 10 }}>
+                    <View style={{ flexGrow: 1, gap: 8 }}>
+                        <Text style={{ color: '#333', fontWeight: 'bold' }}>{currentOrder?.customername}</Text>
+                        <Text style={{ color: '#333' }}>{currentOrder?.customerphone}</Text>
                     </View>
-                        :
-                        <View style={{ flexGrow: 1, gap: 8 }}>
-                            <Text style={{ color: '#333', fontWeight: 'bold' }}>{'DELIVERY'}</Text>
-                            <Text style={{ color: '#333', fontSize: 16 }}>{currentOrder?.restaurantname}</Text>
-                        </View>
-                    }
                     <IconButton
                         text=''
                         icon='phone'
@@ -92,9 +80,37 @@ export default function OnFrontScreen() {
                         iconColor='#333'
                     />
                 </View>
+                {currentOrder?.instructionsDeliver && <View style={{ gap: 8 }}>
+                    <Text style={{ color: '#333', fontWeight: 'bold' }}>{'Delivery instruction'}</Text>
+                    <Text style={{ color: '#333' }}>{currentOrder?.instructionsDeliver}</Text>
+                </View>}
+                <View style={{ gap: 8 }}>
+                    <Text style={{ color: '#333', fontWeight: 'bold' }}>{'Restaurant'}</Text>
+                    <Text style={{ color: '#333' }}>{currentOrder?.restaurantname}</Text>
+                </View>
+                {currentOrder && currentOrder.ordertextinfoforappObject && currentOrder.ordertextinfoforappObject.Items.map((item, index) => (
+                    <View style={styles.itemContainer} key={index}>
+                        <Text style={{
+                            color: '#333',
+                            fontWeight: 'bold'
+                        }}>{item.Quantity}{' x '}</Text>
+                        <View style={{ flexGrow: 1 }}>
+                            <View>
+                                <Text style={{
+                                    color: '#333',
+                                    fontWeight: 'bold'
+                                }}>{item.Name}</Text>
+                            </View>
+                            {item.AdditionalInfo && item.AdditionalInfo !== '' && <Text style={{
+                                color: '#333',
+                                fontWeight: 'bold'
+                            }}>{item.AdditionalInfo}</Text>}
+                        </View>
+                    </View>
+                ))}
                 <View style={{ gap: 8, flexDirection: 'row' }}>
                     <View style={{ flexGrow: 1 }}>
-                        <Text style={{ color: '#3c8dbc', fontWeight: 'bold' }}>{'CONFIRM ORDER'}</Text>
+                        <Text style={{ color: '#3c8dbc', fontWeight: 'bold' }}>{'CONFIRM DELIVERY'}</Text>
                     </View>
                     <IconButton
                         text=''
@@ -117,7 +133,7 @@ export default function OnFrontScreen() {
                         paddingVertical: 18,
                         marginBottom: 12
                     }}>
-                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>{'START DELIVERY'}</Text>
+                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>{'FINISH'}</Text>
                 </View>
             </View>
         </View >
@@ -159,5 +175,12 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         color: '#c0392b',
         fontWeight: 'bold',
+    },
+    itemContainer: {
+        flexDirection: 'row',
+        paddingVertical: 5,
+        paddingLeft: 24,
+        borderTopWidth: 1,
+        borderTopColor: '#e5e5e5'
     },
 });

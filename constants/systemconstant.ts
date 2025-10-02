@@ -49,6 +49,9 @@ export const enum OrderStatus {
     _REFUSE = 'REFUSE',
     _ACCEPT = 'ACCEPT',
     _ONFRONT = 'ONFRONT',
+    _CANCELPICKUP = 'CANCELPICKUP',
+    _ONWAY = 'ONWAY',
+    _CAME = 'CAME',
 }
 export const defaultRegion = {
     latitude: 37.78825,

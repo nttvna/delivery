@@ -15,6 +15,10 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="onway" options={{ headerShown: false }} />
             <Stack.Screen name="onfront" options={{ headerShown: false }} />
+            <Stack.Screen name="pickup" options={{ headerShown: false }} />
+            <Stack.Screen name="delivering" options={{ headerShown: false }} />
+            <Stack.Screen name="came" options={{ headerShown: false }} />
+            <Stack.Screen name="finish" options={{ headerShown: false }} />
           </Stack>
         </SafeAreaProvider>
         <Toast />
