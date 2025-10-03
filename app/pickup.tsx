@@ -42,7 +42,7 @@ export default function PickupScreen() {
                 orderstatus: OrderStatus._ONWAY
             })
                 .then(() => {
-                    router.replace('/(tabs)');
+                    router.replace('/delivering');
                 })
                 .catch((error) => {
                     showToast("update failed");

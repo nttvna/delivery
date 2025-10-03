@@ -72,10 +72,18 @@ export default function DeliveringScreen() {
                         }
                     }));
                     const points = polyline.decode(data.routes[0].overview_polyline.points);
-                    const routeCoordinates = points.map(point => ({
-                        latitude: point[0],
-                        longitude: point[1],
-                    }));
+                    const routeCoordinates = points.map(point => {
+                        // Check if point has at least 2 elements and they are both numbers
+                        if (point && point.length === 2 && typeof point[0] === 'number' && typeof point[1] === 'number') {
+                            return {
+                                latitude: point[0], // [latitude, longitude]
+                                longitude: point[1],
+                            };
+                        }
+                        // Log the bad point (or skip it entirely)
+                        console.warn("Skipping bad polyline point:", point);
+                        return null; // Return null for invalid points
+                    }).filter(point => point !== null); // Filter o
                     setPolylineCoordinates(routeCoordinates);
                 }
                 else {
@@ -110,7 +118,7 @@ export default function DeliveringScreen() {
                 orderstatus: OrderStatus._CAME
             })
                 .then(() => {
-                    router.replace('/onfront');
+                    router.replace('/came');
                 })
                 .catch((error) => {
                     showToast("update failed");
@@ -181,7 +189,7 @@ export default function DeliveringScreen() {
                 <IconButton
                     text=''
                     icon='phone'
-                    onPress={makeCall}
+                    onPress={setCame}
                     bgColor={'transparent'}
                     size='md'
                     width={80}
